@@ -1,0 +1,7 @@
+{
+    "jwtSecretKey": [],
+    "cryptoKey": [],
+    "jwtExpiresIn": false,
+    "cryptoAlgo": "aes-256-cbc",
+    "ivLength": 16
+}

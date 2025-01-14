@@ -1,0 +1,166 @@
+const Event = require("../models/events");
+const { uploadOnCloudinary } = require("../utils/cloudinary");
+
+// this controller is for creating event
+exports.createEvents = async (req, res) => {
+    try {
+        const { title, description, startDate, endDate, location } = req.body;
+
+        // validating the data 
+        if (!title || !description || !req.files?.image || !startDate || !endDate || !location || req.files.image.length === 0) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Upload images to Cloudinary and get URLs
+        const imageUrls = [];
+        for (let i = 0; i < req.files.image.length; i++) {
+            const image = req.files.image[i];
+            const cloudinaryResponse = await uploadOnCloudinary(image.path);
+            imageUrls.push(cloudinaryResponse.secure_url); // Store Cloudinary URL of the uploaded image
+        }
+
+        // creating Event
+        const event = await Event.create(
+            {
+                title,
+                description,
+                image: imageUrls,
+                startDate,
+                endDate,
+                location
+            }
+        )
+
+        // checking if Event is created or not
+        if (!event) {
+            return res.status(500).json({ message: "Event not created" });
+        }
+
+        // return response
+        return res.status(201).json({ message: "Event created successfully" });
+    } catch (error) {
+        return res.statsu(500).json({ message: "Internal Server Error" })
+    }
+}
+
+// this controller is for getting all the events
+exports.getEvents = async (req, res) => {
+    try {
+        const events = await Event.find({}, "title image startDate description endDate").lean();
+
+        // checking if events are found
+        if (!events) {
+            return res.status(500).json({ message: "Events not found" });
+        }
+
+        // return response
+        return res.status(200).json({ data: events });
+
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+// this controller is for get a single event
+exports.getSingleEvent = async (req, res) => {
+    try {
+        const { eventId } = req.params
+
+        // checking if event id is provided or not
+        if (!eventId) {
+            return res.status(400).json({ message: "Event Id is required" });
+        }
+
+        // getting single event
+        const singleEvent = await Event.findById(eventId, "title description image startDate endDate location createdAt").lean()
+
+        // checking if event is found
+        if (!singleEvent) {
+            return res.status(500).json({ message: "Event not found" });
+        }
+
+        // return response
+        return res.status(200).json({ data: singleEvent });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+// this controller is for deleting an event
+exports.deleteEvent = async (req, res) => {
+    try {
+        const { eventId } = req.params
+
+        // checking if event id is provided or not
+        if (!eventId) {
+            return res.status(400).json({ message: "Event Id is required" });
+        }
+
+        // deleting event
+        const deletedEvent = await Event.findByIdAndDelete(eventId).lean()
+
+        // checking if event is deleted
+        if (!deletedEvent) {
+            return res.status(500).json({ message: "Event not found" });
+        }
+
+        // return response
+        return res.status(200).json({ message: "Event deleted successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+// this controller is for updating an event
+exports.editEvent = async (req, res) => {
+    try {
+        const { title, description, startDate, endDate, location } = req.body
+        const { eventId } = req.params
+
+        // checking if event id is provided or not
+        if (!eventId) {
+            return res.status(400).json({ message: "Event Id is required" });
+        }
+
+        const updated = {}
+
+        if (title) updated.title = title
+        if (description) updated.description = description
+        // Handle image update if new images are uploaded
+        if (req.files?.image) {
+            const newImages = [];
+
+            // Loop through the uploaded images
+            for (let i = 0; i < req.files.image.length; i++) {
+                const image = req.files.image[i];
+
+                // Upload each image to Cloudinary
+                const cloudinaryResponse = await uploadOnCloudinary(image.path);
+                newImages.push(cloudinaryResponse.secure_url); // Store the Cloudinary URL for each image
+            }
+
+            // Update the images field with new images (replace the old ones)
+            updated.image = newImages; // Assuming you want to replace all images
+        }
+        if (startDate) updated.startDate = startDate
+        if (endDate) updated.endDate = endDate
+        if (location) updated.location = location
+
+        // updating event
+        const updatedEvent = await Event.findByIdAndUpdate(eventId,
+            updated,
+            { new: true, lean: true }
+        );
+
+        // checking if Event is updated
+        if (!updatedEvent) {
+            return res.status(500).json({ message: "Event not found" });
+        }
+
+        // return response
+        return res.status(200).json({ message: "Event updated successfully" });
+
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+}

@@ -32,7 +32,7 @@ const corsOptions = {
     credentials: true,
 }
 app.use(cors(corsOptions));
-app.use(express_request_id.default());
+app.use(express_request_id());
 // app.use(request_context.default.middleware('apirequest'));
 // app.use((req, _, next) => {
 //     request_context.set('apirequest:requestid', req['id']);
@@ -42,7 +42,7 @@ app.use(express_request_id.default());
 // });
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(expressLogger);
+// app.use(expressLogger);
 
 // check heartbeat
 

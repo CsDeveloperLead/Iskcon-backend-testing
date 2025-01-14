@@ -32,7 +32,7 @@ const corsOptions = {
     credentials: true,
 }
 app.use(cors(corsOptions));
-app.use(express_request_id.default());
+// app.use(express_request_id.default());
 // app.use(request_context.default.middleware('apirequest'));
 // app.use((req, _, next) => {
 //     request_context.set('apirequest:requestid', req['id']);

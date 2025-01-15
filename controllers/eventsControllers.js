@@ -7,16 +7,19 @@ exports.createEvents = async (req, res) => {
         const { title, description, startDate, endDate, location } = req.body;
 
         // validating the data 
-        if (!title || !description || !req.files?.image || !startDate || !endDate || !location || req.files.image.length === 0) {
+        if (!title || !description || !req.files || !startDate || !endDate || !location || req.files?.length === 0) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
         // Upload images to Cloudinary and get URLs
         const imageUrls = [];
-        for (let i = 0; i < req.files.image.length; i++) {
-            const image = req.files.image[i];
-            const cloudinaryResponse = await uploadOnCloudinary(image.path);
-            imageUrls.push(cloudinaryResponse.secure_url); // Store Cloudinary URL of the uploaded image
+        for (const file of req.files) {
+            try {
+                const cloudinaryResponse = await uploadOnCloudinary(file.path);
+                imageUrls.push(cloudinaryResponse.secure_url);
+            } catch (uploadError) {
+                return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+            }
         }
 
         // creating Event
@@ -39,7 +42,9 @@ exports.createEvents = async (req, res) => {
         // return response
         return res.status(201).json({ message: "Event created successfully" });
     } catch (error) {
-        return res.statsu(500).json({ message: "Internal Server Error" })
+        console.log(error);
+
+        // return res.status(500).json({ message: "Internal Server Error" })
     }
 }
 

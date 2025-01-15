@@ -1,7 +1,7 @@
 const express = require('express');
-const express_request_id = require('express-request-id');
-const request_context = require('request-context');
-const errorconfig = require('./helpers/errorconfig');
+// const express_request_id = require('express-request-id');
+// const request_context = require('request-context');
+// const errorconfig = require('./helpers/errorconfig');
 const { logger, expressLogger } = require('./utils/logger');
 const cors = require('cors');
 const { errorHandler } = require("./middlewares/errorHandler");
@@ -32,7 +32,7 @@ const corsOptions = {
     credentials: true,
 }
 app.use(cors(corsOptions));
-app.use(express_request_id());
+// app.use(express_request_id());
 // app.use(request_context.default.middleware('apirequest'));
 // app.use((req, _, next) => {
 //     request_context.set('apirequest:requestid', req['id']);

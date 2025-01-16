@@ -14,8 +14,8 @@ const mongo_url = process.env.MONGO_CONN;
 const connectToMongoDB = async () => {
     try {
         await mongoose.connect(mongo_url, {
-            // useNewUrlParser: true,
-            // useUnifiedTopology: true,
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
         });
         // logger.debug('Connected to Iskcon MongoDB');
         // global['config'] = configModel.findOne({}).select('-_id').lean().exec();

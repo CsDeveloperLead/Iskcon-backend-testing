@@ -10,6 +10,7 @@ const serviceRouterAdmin = require('./v1/admin/services.routes');
 const orderRouterAdmin = require('./v1/admin/order.routes');
 const adminCreate = require('./v1/admin/admin.routes');
 const offlineClassesRouter = require('./v1/admin/offlineClasses.routes');
+const productRouter = require('./v1/admin/product.routes');
 // const iskconCore = require('../routes/v1/iskconCore');
 // const apiKeyCheck = require("../middlewares/apiKeyCheck");
 
@@ -26,5 +27,6 @@ router.use('/v1/admin/event', eventRouterAdmin);
 router.use('/v1/admin/service', serviceRouterAdmin);
 router.use('/v1/admin/order', orderRouterAdmin);
 router.use('/v1/admin/offlineClasses', offlineClassesRouter);
+router.use('/v1/admin/products', productRouter); 
 
 module.exports = router;

@@ -4,33 +4,46 @@ const OfflineClasses = require("../models/offlineClasses");
 
 // this controller is for creating Offline classes
 exports.createOfflineClasses = async (req, res) => {
+   
+    console.log("hello")
     try {
         const { title, description, timings, location, classesDays } = req.body;
 
+        console.log(req.body)
+
         // validating the data 
-        if (!title || !description || !req.files?.image || !timings || !location || !classesDays || req.files.image.length === 0) {
+        if (!title || !description || !timings || !location || !classesDays) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
         // Upload images to Cloudinary and get URLs
-        const imageUrls = [];
-        for (let i = 0; i < req.files.image.length; i++) {
-            const image = req.files.image[i];
-            const cloudinaryResponse = await uploadOnCloudinary(image.path);
-            imageUrls.push(cloudinaryResponse.secure_url); // Store Cloudinary URL of the uploaded image
-        }
+        // const imageUrls = [];
+        // for (const file of req.files) {
+        //     try {
+        //         const cloudinaryResponse = await uploadOnCloudinary(file.path);
+        //         imageUrls.push(cloudinaryResponse.secure_url);
+        //     } catch (uploadError) {
+        //         return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+        //     }
+        // }
+
+        console.log("hello 3")
+        // console.log(imageUrls)
+        console.log("hello 4")
 
         // creating Offline classes
-        const classes = await OfflineClasses.create(
+        const classes = new OfflineClasses(
             {
                 title,
                 description,
-                image: imageUrls,
                 timings,
                 location,
-                classesDays
+                classesDays,
             }
         )
+        await classes.save()
+        console.log(classes)
+        console.log('classes')
 
         // checking if blog is created or not
         if (!classes) {
@@ -40,6 +53,7 @@ exports.createOfflineClasses = async (req, res) => {
         // return response
         return res.status(201).json({ message: "Classes created successfully" });
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }

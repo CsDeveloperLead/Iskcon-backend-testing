@@ -51,7 +51,7 @@ exports.createEvents = async (req, res) => {
 // this controller is for getting all the events
 exports.getEvents = async (req, res) => {
     try {
-        const events = await Event.find({}, "title image startDate description endDate").lean();
+        const events = await Event.find({}, "title image startDate description endDate location").lean();
 
         // checking if events are found
         if (!events) {
@@ -132,18 +132,18 @@ exports.editEvent = async (req, res) => {
         if (title) updated.title = title
         if (description) updated.description = description
         // Handle image update if new images are uploaded
-        if (req.files?.image) {
+        if (req.files) {
             const newImages = [];
 
             // Loop through the uploaded images
-            for (let i = 0; i < req.files.image.length; i++) {
-                const image = req.files.image[i];
-
-                // Upload each image to Cloudinary
-                const cloudinaryResponse = await uploadOnCloudinary(image.path);
-                newImages.push(cloudinaryResponse.secure_url); // Store the Cloudinary URL for each image
+            for (const file of req.files) {
+                try {
+                    const cloudinaryResponse = await uploadOnCloudinary(file.path);
+                    newImages.push(cloudinaryResponse.secure_url);
+                } catch (uploadError) {
+                    return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+                }
             }
-
             // Update the images field with new images (replace the old ones)
             updated.image = newImages; // Assuming you want to replace all images
         }

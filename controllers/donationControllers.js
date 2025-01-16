@@ -9,57 +9,74 @@ exports.createDonation = async (req, res) => {
             description,
             startDate,
             endDate,
-            faqs,
-            donationsCategory,
-            accountDetails
-        } = req.body; 
+            'donationsCategory.title': categoryTitles,
+            'donationsCategory.donationTypes.title': typeTitles,
+            'donationsCategory.donationTypes.amount': typeAmounts,
+        } = req.body;
 
-        // Check if images are provided
-        if (!req.files || !req.files.image || req.files.image.length === 0) { // add third party like cloudinary to handle images
-            return res.status(400).json({ message: "Image is required" });
+
+        // Validate required fields
+        if (!title || !description || !startDate || !endDate || !categoryTitles || !typeTitles || !typeAmounts) {
+            return res.status(400).json({ message: "All fields are required." });
         }
 
-        // Parse JSON fields for arrays or objects (if sent as JSON strings)
-        const parsedFaqs = JSON.parse(faqs);
-        const parsedDonationsCategory = JSON.parse(donationsCategory);
-        const parsedAccountDetails = JSON.parse(accountDetails);
-
-        // Validation for required fields
-        if (!title || !description || !startDate || !endDate || !parsedFaqs.length || !parsedDonationsCategory.length || !parsedAccountDetails) {
-            return res.status(400).json({ message: "All fields are required" });
+        // Reconstruct donationsCategory from flat fields
+        const donationsCategory = [];
+        if (Array.isArray(categoryTitles)) {
+            // Handle multiple categories
+            categoryTitles.forEach((categoryTitle, index) => {
+                donationsCategory.push({
+                    title: categoryTitle,
+                    donationTypes: [
+                        {
+                            title: typeTitles[index],
+                            amount: typeAmounts[index],
+                        },
+                    ],
+                });
+            });
+        } else {
+            // Handle single category
+            donationsCategory.push({
+                title: categoryTitles,
+                donationTypes: [
+                    {
+                        title: typeTitles,
+                        amount: typeAmounts,
+                    },
+                ],
+            });
         }
 
-        // Validate each FAQ object
-        for (const faq of parsedFaqs) {
-            if (!faq.question || !faq.answer) {
-                return res.status(400).json({ message: "Each FAQ must have a question and answer" });
-            }
-        }
-
-        // Validate each donation category and its types
-        for (const category of parsedDonationsCategory) {
-            if (!category.title || !category.donationTypes.length) {
-                return res.status(400).json({ message: "Each donation category must have a title and at least one donation type" });
+        // Validate reconstructed donationsCategory
+        for (const category of donationsCategory) {
+            if (!category.title || !category.donationTypes || category.donationTypes.length === 0) {
+                return res.status(400).json({ message: "Each category must have a title and at least one donation type." });
             }
             for (const type of category.donationTypes) {
                 if (!type.title || !type.amount) {
-                    return res.status(400).json({ message: "Each donation type must have a title and amount" });
+                    return res.status(400).json({ message: "Each donation type must have a title and an amount." });
                 }
             }
         }
 
-        // Validate account details
-        const { accountName, accountNumber, bankName, ifscCode, branchName } = parsedAccountDetails;
-        if (!accountName || !accountNumber || !bankName || !ifscCode || !branchName) {
-            return res.status(400).json({ message: "Complete account details are required" });
+        // Validate images
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: "At least one image is required." });
         }
 
-        // Upload images to Cloudinary and get URLs
+        // Upload images to Cloudinary
         const imageUrls = [];
-        for (let i = 0; i < req.files.image.length; i++) {
-            const image = req.files.image[i];
-            const cloudinaryResponse = await uploadOnCloudinary(image.path);
-            imageUrls.push(cloudinaryResponse.secure_url); // Store Cloudinary URL of the uploaded image
+        for (const file of req.files) {
+            try {
+                const cloudinaryResponse = await uploadOnCloudinary(file.path);
+                imageUrls.push(cloudinaryResponse.secure_url);
+            } catch (uploadError) {
+                return res.status(500).json({
+                    message: "Failed to upload images.",
+                    error: uploadError.message,
+                });
+            }
         }
 
         // Create a new donation record
@@ -69,25 +86,27 @@ exports.createDonation = async (req, res) => {
             image: imageUrls,
             startDate,
             endDate,
-            faqs: parsedFaqs,
-            donationsCategory: parsedDonationsCategory,
-            accountDetails: parsedAccountDetails
+            donationsCategory,
         });
 
-        // Save the donation record to the database
+        // Save to database
         await newDonation.save();
 
-        return res.status(201).json({ message: "Donation created successfully", donation: newDonation });
+        return res.status(201).json({
+            message: "Donation created successfully.",
+            donation: newDonation,
+        });
     } catch (error) {
         console.error("Error creating donation:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
+
 
 // this controller is for getting all donations
 exports.getDonations = async (req, res) => {
     try {
-        const donations = await Donate.find({}, "title image startDate endDate").lean()
+        const donations = await Donate.find({}, "title image startDate donationsCategory endDate description").lean()
 
         // checking if donations are found
         if (!donations) {
@@ -112,7 +131,7 @@ exports.getSingleDonations = async (req, res) => {
         }
 
         // finding single donation
-        const singleDonation = await Donate.findById(donationId,"title description image startDate endDate faqs donationsCategory accountDetails createdAt").lean()
+        const singleDonation = await Donate.findById(donationId, "title description image startDate endDate donationsCategory createdAt").lean()
 
         // checking if donation is found
         if (!singleDonation) {
@@ -150,3 +169,82 @@ exports.deleteDonation = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
+
+exports.updateDonation = async (req, res) => {
+    try {
+        const {
+            title,
+            description,
+            startDate,
+            endDate,
+            donationsCategory, // Directly getting donationsCategory
+            existingImages,    // For preserving existing images
+        } = req.body;
+
+        // Log extracted data for debugging
+        console.log(title, description, startDate, endDate, donationsCategory, existingImages);
+
+        // Validate required fields
+        if (!title || !description || !startDate || !endDate || !donationsCategory || donationsCategory.length === 0) {
+            return res.status(400).json({ message: "All fields are required." });
+        }
+
+        donationsCategory.forEach((category, categoryIndex) => {
+            if (!category.title || !category.donationTypes || category.donationTypes.length === 0) {
+                return res.status(400).json({ message: `Category at index ${categoryIndex} must have a title and at least one donation type.` });
+            }
+
+            category.donationTypes.forEach((type, typeIndex) => {
+                if (!type.title || !type.amount) {
+                    return res.status(400).json({ message: `Donation type at category ${categoryIndex}, type ${typeIndex} must have a title and an amount.` });
+                }
+            });
+        });
+
+        // Handle image upload (if files are provided)
+        let imageUrls = [];
+        if (req.files && req.files.length > 0) {
+            // Assuming you're uploading images to Cloudinary or another cloud service
+            for (const file of req.files) {
+                try {
+                    const cloudinaryResponse = await uploadOnCloudinary(file.path); // Implement your upload logic
+                    imageUrls.push(cloudinaryResponse.secure_url);
+                } catch (uploadError) {
+                    return res.status(500).json({
+                        message: "Failed to upload images.",
+                        error: uploadError.message,
+                    });
+                }
+            }
+        } else {
+            imageUrls = existingImages || []; // Preserve existing images if no new images are uploaded
+        }
+
+        // Find the donation by ID and update it
+        const donationId = req.params.donationId;
+        const donation = await Donation.findById(donationId);
+
+        if (!donation) {
+            return res.status(404).json({ message: "Donation not found" });
+        }
+
+        // Update the donation fields
+        donation.title = title || donation.title;
+        donation.description = description || donation.description;
+        donation.startDate = startDate || donation.startDate;
+        donation.endDate = endDate || donation.endDate;
+        donation.donationsCategory = donationsCategory || donation.donationsCategory;
+        donation.image = imageUrls.length > 0 ? imageUrls : donation.image; // Update images if new ones are uploaded
+
+        // Save the updated donation
+        await donation.save();
+
+        return res.status(200).json({
+            message: "Donation updated successfully.",
+            donation,
+        });
+    } catch (error) {
+        console.error("Error updating donation:", error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};

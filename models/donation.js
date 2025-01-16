@@ -23,12 +23,12 @@ const donateSchema = new mongoose.Schema(
             type: Date,
             required: true
         },
-        faqs: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Faq'
-            }
-        ],
+        // faqs: [
+        //     {
+        //         type: mongoose.Schema.Types.ObjectId,
+        //         ref: 'Faq'
+        //     }
+        // ],
         donationsCategory: [
             {
                 title: {
@@ -49,28 +49,28 @@ const donateSchema = new mongoose.Schema(
                 ]
             }
         ],
-        accountDetails: {
-            accountName: {
-                type: String,
-                required: true
-            },
-            accountNumber: {
-                type: Number,
-                required: true
-            },
-            bankName: {
-                type: String,
-                required: true
-            },
-            ifscCode: {
-                type: String,
-                required: true
-            },
-            branchName: {
-                type: String,
-                required: true
-            }
-        },
+        // accountDetails: {
+        //     accountName: {
+        //         type: String,
+        //         required: true
+        //     },
+        //     accountNumber: {
+        //         type: Number,
+        //         required: true
+        //     },
+        //     bankName: {
+        //         type: String,
+        //         required: true
+        //     },
+        //     ifscCode: {
+        //         type: String,
+        //         required: true
+        //     },
+        //     branchName: {
+        //         type: String,
+        //         required: true
+        //     }
+        // },
         createdAt: {
             type: String, // Store as string for custom format
             default: () => moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss'), // Set default to current time in IST

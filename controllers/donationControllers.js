@@ -9,53 +9,32 @@ exports.createDonation = async (req, res) => {
             description,
             startDate,
             endDate,
-            'donationsCategory.title': categoryTitles,
-            'donationsCategory.donationTypes.title': typeTitles,
-            'donationsCategory.donationTypes.amount': typeAmounts,
+            donationsCategory, // Directly an array
         } = req.body;
 
-
         // Validate required fields
-        if (!title || !description || !startDate || !endDate || !categoryTitles || !typeTitles || !typeAmounts) {
+        if (!title || !description || !startDate || !endDate || !donationsCategory) {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-        // Reconstruct donationsCategory from flat fields
-        const donationsCategory = [];
-        if (Array.isArray(categoryTitles)) {
-            // Handle multiple categories
-            categoryTitles.forEach((categoryTitle, index) => {
-                donationsCategory.push({
-                    title: categoryTitle,
-                    donationTypes: [
-                        {
-                            title: typeTitles[index],
-                            amount: typeAmounts[index],
-                        },
-                    ],
-                });
-            });
-        } else {
-            // Handle single category
-            donationsCategory.push({
-                title: categoryTitles,
-                donationTypes: [
-                    {
-                        title: typeTitles,
-                        amount: typeAmounts,
-                    },
-                ],
-            });
+        // Validate donationsCategory
+        if (!Array.isArray(donationsCategory) || donationsCategory.length === 0) {
+            return res.status(400).json({ message: "donationsCategory must be a non-empty array." });
         }
 
-        // Validate reconstructed donationsCategory
+        // Validate each donationsCategory and its donationTypes
         for (const category of donationsCategory) {
-            if (!category.title || !category.donationTypes || category.donationTypes.length === 0) {
-                return res.status(400).json({ message: "Each category must have a title and at least one donation type." });
+            if (!category.title || !Array.isArray(category.donationTypes) || category.donationTypes.length === 0) {
+                return res.status(400).json({
+                    message: "Each category must have a title and at least one donation type.",
+                });
             }
+
             for (const type of category.donationTypes) {
-                if (!type.title || !type.amount) {
-                    return res.status(400).json({ message: "Each donation type must have a title and an amount." });
+                if (!type.title || type.amount == null || isNaN(type.amount)) {
+                    return res.status(400).json({
+                        message: "Each donation type must have a title and a valid amount.",
+                    });
                 }
             }
         }

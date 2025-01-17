@@ -5,11 +5,7 @@ const { uploadOnCloudinary } = require("../utils/cloudinary");
 // Create a new product
 const createProduct = async (req, res) => {
     try {
-      console.log("hello ");
-
         const { name, description, price, category , stock , productId} = req.body;
-
-        console.log("hello 2");
         
         // Validate input fields
         if (!name || !description || !price || !category || !req.files || req.files.length === 0 || !stock || !productId) {
@@ -28,7 +24,6 @@ const createProduct = async (req, res) => {
                 return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
             }
         }
-        console.log("hello 3");
 
         // Create the product in the database
         const product = await Product.create({
@@ -41,14 +36,10 @@ const createProduct = async (req, res) => {
             productId
         });
 
-        console.log("hello 4");
-
         // Check if product creation was successful
         if (!product) {
             return res.status(500).json({ message: "Failed to create product" });
         }
-
-        console.log("hello 5");
 
         // Send success response
         return res.status(201).json({

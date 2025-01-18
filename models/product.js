@@ -31,6 +31,20 @@ const productSchema = new mongoose.Schema({
     type: String, // Assuming images are stored as URLs or file paths
     required: true,
   }],
+  subDesc:{
+    type: String,
+    required: true
+  },
+  size:[
+    {
+      sizeType:{
+        type: String,
+      },
+      amount:{
+        type: Number
+      }
+    }
+  ],
   category: {
     type: String,
     required: true,

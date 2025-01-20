@@ -120,11 +120,21 @@ exports.deleteEvent = async (req, res) => {
 exports.editEvent = async (req, res) => {
     try {
         const { title, description, startDate, endDate, location } = req.body
+        let { previousImages } = req.body;
         const { eventId } = req.params
 
         // checking if event id is provided or not
         if (!eventId) {
             return res.status(400).json({ message: "Event Id is required" });
+        }
+
+        // Ensure previousImages is an array
+        if (previousImages && typeof previousImages === "string") {
+            try {
+                previousImages = JSON.parse(previousImages); // Convert stringified array to actual array
+            } catch (err) {
+                return res.status(400).json({ message: "Invalid format for previousImages" });
+            }
         }
 
         const updated = {}
@@ -133,7 +143,7 @@ exports.editEvent = async (req, res) => {
         if (description) updated.description = description
         // Handle image update if new images are uploaded
         if (req.files) {
-            const newImages = [];
+            const newImages = [...previousImages];
 
             // Loop through the uploaded images
             for (const file of req.files) {

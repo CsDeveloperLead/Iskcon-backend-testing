@@ -115,11 +115,21 @@ exports.deleteBlog = async (req, res) => {
 exports.editBlog = async (req, res) => {
     try {
         const { title, description } = req.body;
+        let { previousImages } = req.body;
         const { blogId } = req.params;
 
         // Check if blogId is provided
         if (!blogId) {
             return res.status(400).json({ message: "Blog Id is required" });
+        }
+
+        // Ensure previousImages is an array
+        if (previousImages && typeof previousImages === "string") {
+            try {
+                previousImages = JSON.parse(previousImages); // Convert stringified array to actual array
+            } catch (err) {
+                return res.status(400).json({ message: "Invalid format for previousImages" });
+            }
         }
 
         const updated = {};
@@ -130,7 +140,7 @@ exports.editBlog = async (req, res) => {
 
         // Handle image update if new images are uploaded
         if (req.files) {
-            const newImages = [];
+            const newImages = [...previousImages];
 
             // Loop through the uploaded images
             for (const file of req.files) {

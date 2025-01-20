@@ -116,11 +116,21 @@ exports.deleteService = async (req, res) => {
 exports.editService = async (req, res) => {
     try {
         const { title, description } = req.body
+        let { previousImages } = req.body;
         const { serviceId } = req.params
 
         // checking if service id is provided or not
         if (!serviceId) {
             return res.status(400).json({ message: "Service Id is required" });
+        }
+
+        // Ensure previousImages is an array
+        if (previousImages && typeof previousImages === "string") {
+            try {
+                previousImages = JSON.parse(previousImages); // Convert stringified array to actual array
+            } catch (err) {
+                return res.status(400).json({ message: "Invalid format for previousImages" });
+            }
         }
 
         const updated = {}
@@ -129,7 +139,7 @@ exports.editService = async (req, res) => {
         if (description) updated.description = description
         // Handle image update if new images are uploaded
         if (req.files) {
-            const newImages = [];
+            const newImages = [...previousImages];
 
             // Loop through the uploaded images
             for (const file of req.files) {

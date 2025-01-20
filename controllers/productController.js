@@ -133,6 +133,7 @@ const deleteProductById = async (req, res) => {
 const editProductById = async (req, res) => {
   try {
     const { id } = req.params;
+    let { previousImages } = req.body;
     const { name, description, price, category, stock, productId, subDesc } = req.body;
 
     if (!id || !name || !description || !price || !category || !stock || !productId) {
@@ -142,6 +143,15 @@ const editProductById = async (req, res) => {
       });
     }
 
+    // Ensure previousImages is an array
+    if (previousImages && typeof previousImages === "string") {
+      try {
+        previousImages = JSON.parse(previousImages); // Convert stringified array to actual array
+      } catch (err) {
+        return res.status(400).json({ message: "Invalid format for previousImages" });
+      }
+    }
+
     const updates = {};
     if (name) updates.name = name;
     if (description) updates.description = description;
@@ -149,7 +159,7 @@ const editProductById = async (req, res) => {
     if (category) updates.category = category;
     if (subDesc) updates.subDesc = subDesc
     if (req.files) {
-      const newImages = [];
+      const newImages = [...previousImages];
 
       // Loop through the uploaded images
       for (const file of req.files) {
@@ -161,7 +171,7 @@ const editProductById = async (req, res) => {
         }
       }
       // Update the images field with new images (replace the old ones)
-      updates.image = newImages; // Assuming you want to replace all images
+      updates.images = newImages; // Assuming you want to replace all images
     }
     if (stock) updates.stock = stock;
     if (productId) updates.productId = productId;

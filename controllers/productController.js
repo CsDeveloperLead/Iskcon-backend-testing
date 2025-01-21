@@ -176,7 +176,7 @@ const editProductById = async (req, res) => {
     if (stock) updates.stock = stock;
     if (productId) updates.productId = productId;
 
-    const product = await Product.findByIdAndUpdate(
+    const product = await Product.findByIdAndUpdate(   
       id,
       { ...updates, updatedAt: moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss') },
       { new: true, runValidators: true } // Return updated document

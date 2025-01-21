@@ -11,6 +11,7 @@ const orderRouterAdmin = require('./v1/admin/order.routes');
 const adminCreate = require('./v1/admin/admin.routes');
 const offlineClassesRouter = require('./v1/admin/offlineClasses.routes');
 const productAdminRouter = require('./v1/admin/product.routes');
+const csrDonationRouter = require('./v1/admin/csrdonation.routes');
 // const iskconCore = require('../routes/v1/iskconCore');
 // const apiKeyCheck = require("../middlewares/apiKeyCheck");
 
@@ -28,6 +29,7 @@ router.use('/v1/admin/service', serviceRouterAdmin);
 router.use('/v1/admin/order', orderRouterAdmin);
 router.use('/v1/admin/offlineClasses', offlineClassesRouter);
 router.use('/v1/admin/product',productAdminRouter );
+router.use('/v1/admin/csrdonation', csrDonationRouter);
 
 
 module.exports = router;

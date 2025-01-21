@@ -5,33 +5,28 @@ const OfflineClasses = require("../models/offlineClasses");
 // this controller is for creating Offline classes
 exports.createOfflineClasses = async (req, res) => {
    
-    console.log("hello")
     try {
         const { title, description, timings, location, classesDays } = req.body;
 
         console.log(req.body)
 
         // validating the data 
-        if (!title || !description || !timings || !location || !classesDays) {
+        if (!title || !description || !req.files || !timings || !location || !classesDays || req.files?.length === 0) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
         // Upload images to Cloudinary and get URLs
-        // const imageUrls = [];
-        // for (const file of req.files) {
-        //     try {
-        //         const cloudinaryResponse = await uploadOnCloudinary(file.path);
-        //         imageUrls.push(cloudinaryResponse.secure_url);
-        //     } catch (uploadError) {
-        //         return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
-        //     }
-        // }
+        const imageUrls = [];
+        for (const file of req.files) {
+            try {
+                const cloudinaryResponse = await uploadOnCloudinary(file.path);
+                imageUrls.push(cloudinaryResponse.secure_url);
+            } catch (uploadError) {
+                return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+            }
+        }
 
-        console.log("hello 3")
-        // console.log(imageUrls)
-        console.log("hello 4")
-
-        // creating Offline classes
+        
         const classes = new OfflineClasses(
             {
                 title,

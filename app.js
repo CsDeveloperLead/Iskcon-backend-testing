@@ -9,6 +9,7 @@ const routes = require('./routes/index');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const axios = require('axios');
 
 const PORT = process.env.PORT || 8080;
 
@@ -52,6 +53,9 @@ app.use('/api/isckcon', routes);
 // });
 // app.use(errorHandler);
 app.use(express.static("public"))
+app.get('/health', (req, res) => {
+    res.status(200).send('OK'); // Health check endpoint
+});
 
 process.on('uncaughtException', (err) => {
     // logger.error(err);
@@ -59,6 +63,15 @@ process.on('uncaughtException', (err) => {
 
 app.listen(PORT, () => {
     logger.debug(`server running on ${PORT}`);
+    setInterval(async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/health')
+            console.log(response.data)
+        } catch (error) {
+            console.error('Health check failed:', error)
+        }
+    }, 5 * 60 * 1000);
+
 });
 exports.default = app;
 

@@ -65,7 +65,7 @@ app.listen(PORT, () => {
     logger.debug(`server running on ${PORT}`);
     setInterval(async () => {
         try {
-            const response = await axios.get('http://localhost:8080/health')
+            const response = await axios.get('https://iskcon-backend-testing-pcnv.onrender.com/health')
             console.log(response.data)
         } catch (error) {
             console.error('Health check failed:', error)

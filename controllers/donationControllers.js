@@ -157,18 +157,39 @@ exports.updateDonation = async (req, res) => {
             startDate,
             endDate,
             donationsCategory, // Directly getting donationsCategory
-            existingImages,    // For preserving existing images
         } = req.body;
 
-        // Log extracted data for debugging
-        console.log(title, description, startDate, endDate, donationsCategory, existingImages);
+        let { previousImages } = req.body;
+
+        const donationId = req.params.donationId;
+
+        // Parse donationsCategory if it's a string (if it's being sent as JSON string)
+        let parsedDonationsCategory = donationsCategory;
+        if (typeof donationsCategory === 'string') {
+            parsedDonationsCategory = JSON.parse(donationsCategory);
+        }
+
+        // Ensure previousImages is an array
+        if (previousImages && typeof previousImages === "string") {
+            try {
+                previousImages = JSON.parse(previousImages); // Convert stringified array to actual array
+            } catch (err) {
+                return res.status(400).json({ message: "Invalid format for previousImages" });
+            }
+        }
 
         // Validate required fields
-        if (!title || !description || !startDate || !endDate || !donationsCategory || donationsCategory.length === 0) {
+        if (!title || !description || !startDate || !endDate || !parsedDonationsCategory || parsedDonationsCategory.length === 0) {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-        donationsCategory.forEach((category, categoryIndex) => {
+        // Check if donationsCategory is an array before using forEach
+        if (!Array.isArray(parsedDonationsCategory)) {
+            return res.status(400).json({ message: "donationsCategory must be an array." });
+        }
+
+        // Validate donationsCategory structure (optional, but good practice)
+        parsedDonationsCategory.forEach((category, categoryIndex) => {
             if (!category.title || !category.donationTypes || category.donationTypes.length === 0) {
                 return res.status(400).json({ message: `Category at index ${categoryIndex} must have a title and at least one donation type.` });
             }
@@ -181,7 +202,8 @@ exports.updateDonation = async (req, res) => {
         });
 
         // Handle image upload (if files are provided)
-        let imageUrls = [];
+        let imageUrls = [...previousImages]; // Preserve existing images
+
         if (req.files && req.files.length > 0) {
             // Assuming you're uploading images to Cloudinary or another cloud service
             for (const file of req.files) {
@@ -195,14 +217,10 @@ exports.updateDonation = async (req, res) => {
                     });
                 }
             }
-        } else {
-            imageUrls = existingImages || []; // Preserve existing images if no new images are uploaded
         }
 
         // Find the donation by ID and update it
-        const donationId = req.params.donationId;
-        const donation = await Donation.findById(donationId);
-
+        const donation = await Donate.findById(donationId);
         if (!donation) {
             return res.status(404).json({ message: "Donation not found" });
         }
@@ -212,8 +230,8 @@ exports.updateDonation = async (req, res) => {
         donation.description = description || donation.description;
         donation.startDate = startDate || donation.startDate;
         donation.endDate = endDate || donation.endDate;
-        donation.donationsCategory = donationsCategory || donation.donationsCategory;
-        donation.image = imageUrls.length > 0 ? imageUrls : donation.image; // Update images if new ones are uploaded
+        donation.donationsCategory = parsedDonationsCategory || donation.donationsCategory;
+        donation.image = imageUrls // Update images if new ones are uploaded
 
         // Save the updated donation
         await donation.save();
@@ -227,3 +245,4 @@ exports.updateDonation = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
+

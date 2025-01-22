@@ -7,7 +7,7 @@ router.post('/create', upload.array('image'), createDonation); // to create dona
 router.get('/get', getDonations); // to get all the donations
 router.get('/get/:donationId', getSingleDonations); // to get single donation
 router.delete('/delete/:donationId', deleteDonation); // to delete donation
-router.put('/edit/:donationId', updateDonation); // to delete donation
+router.put('/edit/:donationId', upload.array('image'), updateDonation); // to delete donation
 
 
 module.exports = router;

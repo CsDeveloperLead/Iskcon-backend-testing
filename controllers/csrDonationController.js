@@ -88,13 +88,11 @@ exports.updateCSRDonation = async (req, res) => {
 
 exports.deleteCSRDonation = async (req, res) => {
     const { id } = req.params;
-    console.log(id)
     try {
-        const csrDonation = await Donate.findById(id);
+        const csrDonation = await Donate.findByIdAndDelete(id);
         if (!csrDonation) {
             return res.status(404).json({ message: "CSR Donation not found" });
         }
-        await csrDonation.remove();
         res.status(204).json({ message: "CSR Donation deleted successfully" });
     } catch (error) {
         console.error(error);

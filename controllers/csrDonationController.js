@@ -88,6 +88,7 @@ exports.updateCSRDonation = async (req, res) => {
 
 exports.deleteCSRDonation = async (req, res) => {
     const { id } = req.params;
+    console.log(id)
     try {
         const csrDonation = await Donate.findById(id);
         if (!csrDonation) {

@@ -31,16 +31,16 @@ const productSchema = new mongoose.Schema({
     type: String, // Assuming images are stored as URLs or file paths
     required: true,
   }],
-  subDesc:{
+  subDesc: {
     type: String,
     required: true
   },
-  size:[
+  size: [
     {
-      sizeType:{
+      sizeType: {
         type: String,
       },
-      amount:{
+      amount: {
         type: Number
       }
     }
@@ -49,17 +49,17 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
- createdAt: {
-     type: String, // Store as string for custom format
-     default: () => moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss'), // Set default to current time in IST
-   },
-   updatedAt: {
-     type: String, // Store as string for custom format
-     default: () => moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss'), // Set default to current time in IST
-   },
+  createdAt: {
+    type: String, // Store as string for custom format
+    default: () => moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss'), // Set default to current time in IST
+  },
+  updatedAt: {
+    type: String, // Store as string for custom format
+    default: () => moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss'), // Set default to current time in IST
+  },
 });
 
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function (next) {
   // Update the `updatedAt` field to current time in IST
   this.updatedAt = moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss');
   if (!this.createdAt) {
@@ -67,7 +67,7 @@ productSchema.pre('save', function(next) {
     this.createdAt = moment().tz('Asia/Kolkata').format('DD-MM-YYYY HH:mm:ss');
   }
   next();
-   
+
 });
 
 // Export the model

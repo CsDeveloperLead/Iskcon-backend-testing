@@ -63,7 +63,7 @@ const createProduct = async (req, res) => {
 // Get all products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find({}, "productId name subDesc images price").lean(); //  lean is used for optimization
     res.status(200).json({
       success: true,
       data: products,
@@ -81,7 +81,7 @@ const getAllProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
+    const product = await Product.findById(id, "productId name subDesc description images price stock size category").lean();
 
     if (!product) {
       return res.status(404).json({

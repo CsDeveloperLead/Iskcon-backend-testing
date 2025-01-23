@@ -18,7 +18,7 @@ exports.createCSRDonation = async (req, res) => {
         // Upload image to Cloudinary
         const imageUrl = await uploadOnCloudinary(req.files.image[0].path);
         console.log(imageUrl);
- 
+
         // Create the CSR donation
         const csrDonation = await Donate.create({
             title,
@@ -42,7 +42,7 @@ exports.createCSRDonation = async (req, res) => {
 
 exports.getAllCSRDonations = async (req, res) => {
     try {
-        const csrDonations = await Donate.find();
+        const csrDonations = await Donate.find({},"title image startDate endDate description totalAmount amountRaised").lean();
         res.status(200).json(csrDonations);
     } catch (error) {
         console.error(error);
@@ -53,7 +53,7 @@ exports.getAllCSRDonations = async (req, res) => {
 exports.getSingleCSRDonation = async (req, res) => {
     const { id } = req.params;
     try {
-        const csrDonation = await Donate.findById(id);
+        const csrDonation = await Donate.findById(id,"title image startDate endDate description totalAmount amountRaised").lean();
         if (!csrDonation) {
             return res.status(404).json({ message: "CSR Donation not found" });
         }
@@ -66,7 +66,19 @@ exports.getSingleCSRDonation = async (req, res) => {
 
 exports.updateCSRDonation = async (req, res) => {
     const { id } = req.params;
-    const { title, description, image, totalAmount, startDate, endDate } = req.body;
+    let { title, description, image, totalAmount, startDate, endDate } = req.body;
+
+    if (!title || !description || !totalAmount || !startDate || !endDate) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    if (image == undefined && req.files.image) {
+        const imageUrl = await uploadOnCloudinary(req.files.image[0].path);
+        image = imageUrl.secure_url;
+    } else {
+        image = image;
+    }
+
     try {
         const csrDonation = await Donate.findById(id);
         if (!csrDonation) {
@@ -79,11 +91,12 @@ exports.updateCSRDonation = async (req, res) => {
         csrDonation.startDate = startDate;
         csrDonation.endDate = endDate;
         await csrDonation.save();
+
         res.status(200).json(csrDonation);
-    } catch (error) {   
+    } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
-    }   
+    }
 };
 
 exports.deleteCSRDonation = async (req, res) => {

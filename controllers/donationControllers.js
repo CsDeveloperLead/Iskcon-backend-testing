@@ -222,6 +222,7 @@ exports.updateDonation = async (req, res) => {
         // Find the donation by ID and update it
         const donation = await Donate.findById(donationId);
         if (!donation) {
+            logger.warn(`Donation not found at ${donationId}`);
             return res.status(404).json({ message: "Donation not found" });
         }
 
@@ -235,7 +236,7 @@ exports.updateDonation = async (req, res) => {
 
         // Save the updated donation
         await donation.save();
-
+        logger.info(`Donation is updated`);
         return res.status(200).json({
             message: "Donation updated successfully.",
             donation,

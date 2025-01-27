@@ -20,6 +20,7 @@ exports.createOrder = async (req, res) => {
 
         // Validation for required fields
         if (!orderId || !userId || !totalAmount || !parsedPaymentDetails || !parsedShippingAddress || !parsedOrderItems) {
+            logger.warn(`Fields are Required`);
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -37,12 +38,14 @@ exports.createOrder = async (req, res) => {
         });
 
         if (!order) {
+            logger.warn(`Orders are Required`);
             return res.status(500).json({ message: "Order not created" });
         }
-
+        logger.info(`Order Created`);
         return res.status(200).json({ data: order });
 
     } catch (error) {
+        logger.error(`Error on Creating Order`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -54,13 +57,15 @@ exports.getOrders = async (req, res) => {
 
         // checking if orders are found
         if (!orders) {
+            logger.warn(`Orders are Required`);
             return res.status(500).json({ message: "Orders not found" });
         }
-
+        logger.info(`Orders Fetched`);
         // return response
         return res.status(200).json({ data: orders });
 
     } catch (error) {
+        logger.error(`Error on Fetching Orders`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -72,6 +77,7 @@ exports.getSingleOrder = async (req, res) => {
 
         // checking if orderId is provided
         if (!orderId) {
+            logger.warn(`OrdersId are Required`);
             return res.status(400).json({ message: "Order Id is required" });
         }
 
@@ -80,13 +86,15 @@ exports.getSingleOrder = async (req, res) => {
 
         // checking if order is found
         if (!singleOrder) {
+            logger.warn(`Single Order not Found`);
             return res.status(500).json({ message: "Order not found" });
         }
-
+        logger.info(`Single Order Fetched Successful`);
         // return response
         return res.status(200).json({ data: singleOrder });
 
     } catch (error) {
+        logger.error(`Error on Getting Single Order`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -98,6 +106,7 @@ exports.deleteOrder = async (req, res) => {
 
         // checking if orderId is provided
         if (!orderId) {
+            logger.warn(`OrdersID are Required`);
             return res.status(400).json({ message: "Order Id is required" });
         }
 
@@ -106,13 +115,15 @@ exports.deleteOrder = async (req, res) => {
 
         // checking if order is deleted
         if (!deletedOrder) {
+            logger.warn(`Order not Found`);
             return res.status(500).json({ message: "Order not found" });
         }
-
+        logger.info(`Order Deleted Successfully`);
         // return response
         return res.status(200).json({ data: deletedOrder });
 
     } catch (error) {
+        logger.error(`Deleted Order Failed`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -124,6 +135,7 @@ exports.orderBySpecificUser = async (req, res) => {
 
         // checking if userId is provided
         if (!userId) {
+            logger.warn(`UserId is Required`);
             return res.status(400).json({ message: "User Id is required" });
         }
 
@@ -132,13 +144,15 @@ exports.orderBySpecificUser = async (req, res) => {
 
         // checking if orders are found
         if (!orders) {
+            logger.warn(`Orders are Required`);
             return res.status(500).json({ message: "Orders not found" });
         }
-
+        logger.info(`Order by Specific User Successful`);
         // return response
         return res.status(200).json({ data: orders });
 
     } catch (error) {
+        logger.error(`Order by Specific User Failed`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -161,11 +175,12 @@ exports.updateOrderStatus = async (req, res) => {
         if (!updatedOrder) {
             return res.status(500).json({ message: "Order not found" });
         }
-
+        logger.info(`Order Updation Successful`);
         // return response
         return res.status(200).json({ data: updatedOrder });
 
     } catch (error) {
+        logger.error(`Order Updation Failed`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }

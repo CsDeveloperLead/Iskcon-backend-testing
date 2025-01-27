@@ -7,11 +7,13 @@ exports.createCSRDonation = async (req, res) => {
 
         // Validate required fields
         if (!title || !description || !totalAmount || !startDate || !endDate) {
+            logger.warn(`All fields are required`);
             return res.status(400).json({ message: "All fields are required." });
         }
 
         // Validate file upload
         if (!req.files || !req.files.image || !req.files.image[0]) {
+            logger.warn(`Image File is Required`);
             return res.status(400).json({ message: "Image file is required." });
         }
 
@@ -43,6 +45,7 @@ exports.createCSRDonation = async (req, res) => {
 exports.getAllCSRDonations = async (req, res) => {
     try {
         const csrDonations = await Donate.find({},"title image startDate endDate description totalAmount amountRaised").lean();
+        logger.info(`Csr Donations: ${csrDonations}`);
         res.status(200).json(csrDonations);
     } catch (error) {
         logger.error(error);
@@ -55,8 +58,10 @@ exports.getSingleCSRDonation = async (req, res) => {
     try {
         const csrDonation = await Donate.findById(id,"title image startDate endDate description totalAmount amountRaised").lean();
         if (!csrDonation) {
+            logger.warn(`CSR Donation is not found`);
             return res.status(404).json({ message: "CSR Donation not found" });
         }
+        logger.info(`CSR Donation is found at ${id} : ${csrDonation}`);
         res.status(200).json(csrDonation);
     } catch (error) {
         logger.error(error);
@@ -91,7 +96,7 @@ exports.updateCSRDonation = async (req, res) => {
         csrDonation.startDate = startDate;
         csrDonation.endDate = endDate;
         await csrDonation.save();
-
+        logger.info(`CSR Donation is Updated`);
         res.status(200).json(csrDonation);
     } catch (error) {
         logger.error(error);
@@ -104,8 +109,10 @@ exports.deleteCSRDonation = async (req, res) => {
     try {
         const csrDonation = await Donate.findByIdAndDelete(id);
         if (!csrDonation) {
+            logger.warn(`CSR Donation is not found`);
             return res.status(404).json({ message: "CSR Donation not found" });
         }
+        logger.info(`CSR Donation is deleted`);
         res.status(204).json({ message: "CSR Donation deleted successfully" });
     } catch (error) {
         logger.error(error);

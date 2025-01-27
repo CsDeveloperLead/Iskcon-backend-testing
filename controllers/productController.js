@@ -9,6 +9,7 @@ const createProduct = async (req, res) => {
 
     // Validate input fields
     if (!name || !description || !price || !subDesc || !category || !req.files || req.files.length === 0 || !stock || !productId) {
+      logger.warn(`All Input Fields should be there`);
       return res.status(400).json({ message: "All fields are required, including at least one image." });
     }
 
@@ -39,16 +40,17 @@ const createProduct = async (req, res) => {
 
     // Check if product creation was successful
     if (!product) {
+      logger.warn(`Product not found`);
       return res.status(500).json({ message: "Failed to create product" });
     }
-
+    logger.info(`Created Product Successful`);
     // Send success response
     return res.status(201).json({
       message: "Product created successfully",
       product,
     });
   } catch (error) {
-    logger.error("Error in createProduct API:", error.message);
+    logger.error("Error in create Product API:", error.message);
     // Send error response
     return res.status(500).json({
       message: "Internal Server Error",
@@ -64,11 +66,13 @@ const createProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({}, "productId name subDesc images price").lean(); //  lean is used for optimization
+    logger.info(`Fetched All Products`);
     res.status(200).json({
       success: true,
       data: products,
     });
   } catch (error) {
+    logger.error(`Failed to fetch Products`);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products',
@@ -84,17 +88,19 @@ const getProductById = async (req, res) => {
     const product = await Product.findById(id, "productId name subDesc description images price stock size category").lean();
 
     if (!product) {
+      logger.warn(`Product not found`);
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
-
+    logger.info(`Fetched Products using ID`);
     res.status(200).json({
       success: true,
       data: product,
     });
   } catch (error) {
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch product',
@@ -110,17 +116,19 @@ const deleteProductById = async (req, res) => {
     const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
+      logger.warn(`Product not found`);
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
-
+    logger.info(`Deleted Product by ID`);
     res.status(200).json({
       success: true,
       message: 'Product deleted successfully',
     });
   } catch (error) {
+    logger.error(`Error on Deleting Product`,error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete product',
@@ -137,6 +145,7 @@ const editProductById = async (req, res) => {
     const { name, description, price, category, stock, productId, subDesc } = req.body;
 
     if (!id || !name || !description || !price || !category || !stock || !productId) {
+      logger.warn(`All Prodcts should be there`);
       return res.status(400).json({
         success: false,
         message: 'Invalid request',
@@ -148,6 +157,7 @@ const editProductById = async (req, res) => {
       try {
         previousImages = JSON.parse(previousImages); // Convert stringified array to actual array
       } catch (err) {
+        logger.error(`Failed to Edit Product`,error);
         return res.status(400).json({ message: "Invalid format for previousImages" });
       }
     }
@@ -167,6 +177,7 @@ const editProductById = async (req, res) => {
           const cloudinaryResponse = await uploadOnCloudinary(file.path);
           newImages.push(cloudinaryResponse.secure_url);
         } catch (uploadError) {
+          logger.error(`Failed to Upload Image`,error);
           return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
         }
       }
@@ -183,18 +194,20 @@ const editProductById = async (req, res) => {
     );
 
     if (!product) {
+      logger.warn(`Product not found`);
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
-
+    logger.info(`Product Updated Successfully`);
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
       data: product,
     });
   } catch (error) {
+    logger.error(`Failed to update Product`,error);
     res.status(500).json({
       success: false,
       message: 'Failed to update product',

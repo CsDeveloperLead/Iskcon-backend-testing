@@ -76,7 +76,7 @@ exports.createDonation = async (req, res) => {
             donation: newDonation,
         });
     } catch (error) {
-        console.error("Error creating donation:", error);
+        logger.error("Error creating donation:", error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
@@ -241,7 +241,7 @@ exports.updateDonation = async (req, res) => {
             donation,
         });
     } catch (error) {
-        console.error("Error updating donation:", error);
+        logger.error("Error updating donation:", error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };

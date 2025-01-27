@@ -17,7 +17,7 @@ exports.createCSRDonation = async (req, res) => {
 
         // Upload image to Cloudinary
         const imageUrl = await uploadOnCloudinary(req.files.image[0].path);
-        console.log(imageUrl);
+        logger.info(imageUrl);
 
         // Create the CSR donation
         const csrDonation = await Donate.create({
@@ -35,7 +35,7 @@ exports.createCSRDonation = async (req, res) => {
             csrDonation,
         });
     } catch (error) {
-        console.error("Error creating CSR Donation:", error);
+        logger.error("Error creating CSR Donation:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -45,7 +45,7 @@ exports.getAllCSRDonations = async (req, res) => {
         const csrDonations = await Donate.find({},"title image startDate endDate description totalAmount amountRaised").lean();
         res.status(200).json(csrDonations);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -59,7 +59,7 @@ exports.getSingleCSRDonation = async (req, res) => {
         }
         res.status(200).json(csrDonation);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -94,7 +94,7 @@ exports.updateCSRDonation = async (req, res) => {
 
         res.status(200).json(csrDonation);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -108,7 +108,7 @@ exports.deleteCSRDonation = async (req, res) => {
         }
         res.status(204).json({ message: "CSR Donation deleted successfully" });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

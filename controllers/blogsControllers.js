@@ -167,7 +167,7 @@ exports.editBlog = async (req, res) => {
         return res.status(200).json({ message: "Blog updated successfully", updatedBlog });
 
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };

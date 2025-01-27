@@ -42,7 +42,6 @@ app.use(cors(corsOptions));
 //     next();
 // });
 app.use(cookieParser());
-app.use(bodyParser.json());
 app.use(expressLogger);
 
 // check heartbeat

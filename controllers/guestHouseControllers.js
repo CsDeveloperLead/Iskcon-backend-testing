@@ -32,10 +32,11 @@ exports.createHouseGuest = async (req, res) => {
         if (!guestHouse) {
             return res.status(500).json({ message: "GuestHouse not created" });
         }
-
+        logger.info(`House Guest Created`);
         return res.status(201).json({ message: "GuestHouse created successfully" });
 
     } catch (error) {
+        logger.error(`Error on creating house guest`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -47,10 +48,11 @@ exports.getAllGuestHouses = async (req, res) => {
         if (!guestHouses) {
             return res.status(500).json({ message: "GuestHouses not found" });
         }
-
+        logger.info(`Guest House Created`);
         return res.status(200).json({ data: guestHouses });
 
     } catch (error) {
+        logger.error(`Error on Fetching All Guest Houses`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -68,10 +70,11 @@ exports.deleteGuestHouse = async (req, res) => {
         if (!deletedGuestHouse) {
             return res.status(500).json({ message: "GuestHouse not deleted" });
         }
-
+        logger.info(`Guest House Deleted`);
         return res.status(200).json({ message: "GuestHouse deleted successfully" });
 
     } catch (error) {
+        logger.error(`Error on Deleting Guest House`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -120,10 +123,11 @@ exports.editGuestHouse = async (req, res) => {
         if (!updatedGuestHouse) {
             return res.status(500).json({ message: "GuestHouse not updated" });
         }
-
+        logger.info(`Guest House Edited Successfully`);
         return res.status(200).json({ message: "GuestHouse updated successfully" });
 
     } catch (error) {
+        logger.error(`Error on Editing Guest House`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }

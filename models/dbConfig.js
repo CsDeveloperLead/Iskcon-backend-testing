@@ -4,8 +4,8 @@ const mongo_url = process.env.MONGO_CONN;
 
 mongoose.connect(mongo_url)
     .then(() => {
-        console.log('Iskcon DB Connected...');
+        logger.info('Iskcon DB Connected...');
     })
     .catch((err) => {
-        console.log('Iskcon DB Connection Error...')
+        logger.info('Iskcon DB Connection Error...')
     }); 

@@ -8,6 +8,7 @@ exports.createEvents = async (req, res) => {
 
         // validating the data 
         if (!title || !description || !req.files || !startDate || !endDate || !location || req.files?.length === 0) {
+            logger.warn(`One or more fields are missing for creating events`);
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -17,7 +18,9 @@ exports.createEvents = async (req, res) => {
             try {
                 const cloudinaryResponse = await uploadOnCloudinary(file.path);
                 imageUrls.push(cloudinaryResponse.secure_url);
+                logger.info(`Image Uploaded Successfully`);
             } catch (uploadError) {
+                logger.warn(`Image Upload Failed`);
                 return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
             }
         }
@@ -36,13 +39,14 @@ exports.createEvents = async (req, res) => {
 
         // checking if Event is created or not
         if (!event) {
+            logger.warn(`Event Not Created`);
             return res.status(500).json({ message: "Event not created" });
         }
-
+        logger.info(`Event Created Successfully`);
         // return response
         return res.status(201).json({ message: "Event created successfully" });
     } catch (error) {
-        console.log(error);
+        logger.info(error);
 
         // return res.status(500).json({ message: "Internal Server Error" })
     }
@@ -55,6 +59,7 @@ exports.getEvents = async (req, res) => {
 
         // checking if events are found
         if (!events) {
+            logger.warn(`Events not Found`);
             return res.status(500).json({ message: "Events not found" });
         }
 
@@ -62,6 +67,7 @@ exports.getEvents = async (req, res) => {
         return res.status(200).json({ data: events });
 
     } catch (error) {
+        logger.error(`Error On Getting All Events`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -73,6 +79,7 @@ exports.getSingleEvent = async (req, res) => {
 
         // checking if event id is provided or not
         if (!eventId) {
+            logger.warn(`Event Id is Required`);
             return res.status(400).json({ message: "Event Id is required" });
         }
 
@@ -87,6 +94,7 @@ exports.getSingleEvent = async (req, res) => {
         // return response
         return res.status(200).json({ data: singleEvent });
     } catch (error) {
+        logger.error(`Error fetching Single Event`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -108,10 +116,11 @@ exports.deleteEvent = async (req, res) => {
         if (!deletedEvent) {
             return res.status(500).json({ message: "Event not found" });
         }
-
+        logger.info(`Event Deleted`);
         // return response
         return res.status(200).json({ message: "Event deleted successfully" });
     } catch (error) {
+        logger.error(`Error in Deleting Event`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -171,11 +180,12 @@ exports.editEvent = async (req, res) => {
         if (!updatedEvent) {
             return res.status(500).json({ message: "Event not found" });
         }
-
+        logger.info(`Event Edited`);
         // return response
         return res.status(200).json({ message: "Event updated successfully" });
 
     } catch (error) {
+        logger.error(`Error on Editing Event`);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }

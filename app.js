@@ -42,8 +42,7 @@ app.use(cors(corsOptions));
 //     next();
 // });
 app.use(cookieParser());
-app.use(bodyParser.json());
-// app.use(expressLogger);
+app.use(expressLogger);
 
 // check heartbeat
 
@@ -66,9 +65,9 @@ app.listen(PORT, () => {
     setInterval(async () => {
         try {
             const response = await axios.get('https://iskcon-backend-testing-pcnv.onrender.com/health')
-            console.log(response.data)
+            logger.info(response.data)
         } catch (error) {
-            console.error('Health check failed:', error)
+            logger.error('Health check failed:', error)
         }
     }, 5 * 60 * 1000);
 

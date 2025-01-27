@@ -8,6 +8,7 @@ exports.signup = async (req, res) => {
     const { name, email, password, role } = req.body;
     const admin = new Admin({ name, email, password, role });
     await admin.save();
+    logger.info(`Admin Registered Successfully`);
     res.status(201).json({ message: "Admin registered successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -21,12 +22,14 @@ exports.login = async (req, res) => {
     // Find the admin by email
     const admin = await Admin.findOne({ email });
     if (!admin) {
+      logger.warn(`Admin not found for this email : ${admin}`);
       return res.status(404).json({ message: "Admin not found" });
     }
 
     // Compare the provided password with the hashed password
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
+      logger.warn(`Login attempt failed - Invalid credentials for email: ${email}`);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -54,7 +57,8 @@ exports.login = async (req, res) => {
       secure: false, // Use secure cookies in production
       sameSite: "none",
     };
-    
+
+    logger.info(`Login successful for admin: ${admin.email}`);
     // Send the cookies and response
     return res
       .status(200)  
@@ -67,6 +71,7 @@ exports.login = async (req, res) => {
         hmac: { payload, signature },
       });
   } catch (error) {
+    logger.error(`Error during login for email: ${req.body.email}`, error);
     res.status(500).json({ error: error.message });
   }
 };

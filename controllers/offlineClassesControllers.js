@@ -8,10 +8,11 @@ exports.createOfflineClasses = async (req, res) => {
     try {
         const { title, description, timings, location, classesDays } = req.body;
 
-        console.log(req.body)
+        logger.info(req.body)
 
         // validating the data 
         if (!title || !description || !req.files || !timings || !location || !classesDays || req.files?.length === 0) {
+            logger.warn(`Fields are Required`);
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -22,6 +23,7 @@ exports.createOfflineClasses = async (req, res) => {
                 const cloudinaryResponse = await uploadOnCloudinary(file.path);
                 imageUrls.push(cloudinaryResponse.secure_url);
             } catch (uploadError) {
+                logger.error(`Upload Error`,error);
                 return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
             }
         }
@@ -37,18 +39,19 @@ exports.createOfflineClasses = async (req, res) => {
             }
         )
         await classes.save()
-        console.log(classes)
-        console.log('classes')
+        logger.info(classes)
+        logger.info('classes')
 
         // checking if blog is created or not
         if (!classes) {
+            logger.warn(`Classes are Required`);
             return res.status(500).json({ message: "Classes not created" });
         }
 
         // return response
         return res.status(201).json({ message: "Classes created successfully" });
     } catch (error) {
-        console.log(error)
+        logger.info(error)
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -60,13 +63,15 @@ exports.getClasses = async (req, res) => {
 
         // checking if classes is found
         if (!classes) {
+            logger.warn(`Classes are Required`);
             return res.status(500).json({ message: "Classes not found" });
         }
-
+        logger.info(`Fetching Classes Successful`);
         // return response
         return res.status(200).json({ data: classes });
 
     } catch (error) {
+        logger.error(`Error on fetching Class`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -78,6 +83,7 @@ exports.getSingleClass = async (req, res) => {
 
         // checking if class id is provided or not
         if (!classId) {
+            logger.warn(`ClassId is Required`);
             return res.status(400).json({ message: "Class Id is required" });
         }
 
@@ -86,12 +92,15 @@ exports.getSingleClass = async (req, res) => {
 
         // checking if Class is found
         if (!singleClass) {
+            logger.warn(`Single Class is Required`);
             return res.status(500).json({ message: "Class not found" });
         }
 
+        logger.info(`Fetching Single Class Successful`);
         // return response
         return res.status(200).json({ data: singleClass });
     } catch (error) {
+        logger.error(`Error on Fetching Single Class`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -103,6 +112,7 @@ exports.deleteClass = async (req, res) => {
 
         // checking if Class id is provided or not
         if (!classId) {
+            logger.warn(`ClassId is Required`);
             return res.status(400).json({ message: "Class Id is required" });
         }
 
@@ -111,12 +121,14 @@ exports.deleteClass = async (req, res) => {
 
         // checking if Class is deleted
         if (!deletedClass) {
+            logger.warn(`Class is not Found`);
             return res.status(500).json({ message: "Class not found" });
         }
-
+        logger.info(`Deleting Class Successful`);
         // return response
         return res.status(200).json({ message: "Class deleted successfully" });
     } catch (error) {
+        logger.error(`Error on Deleting Class`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -129,6 +141,7 @@ exports.editClass = async (req, res) => {
 
         // Check if ClassId is provided
         if (!classId) {
+            logger.warn(`Class Id is Required`);
             return res.status(400).json({ message: "Class Id is required" });
         }
 
@@ -163,14 +176,15 @@ exports.editClass = async (req, res) => {
 
         // Check if the Class was updated
         if (!updatedClass) {
+            logger.warn(`Classes are Required`);
             return res.status(500).json({ message: "Class not found" });
         }
-
+        logger.info(`Editing Class Successful`);
         // Return success response
         return res.status(200).json({ message: "Class updated successfully", updatedClass });
 
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };

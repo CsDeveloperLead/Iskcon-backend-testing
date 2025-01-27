@@ -76,7 +76,7 @@ exports.createDonation = async (req, res) => {
             donation: newDonation,
         });
     } catch (error) {
-        console.error("Error creating donation:", error);
+        logger.error("Error creating donation:", error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
@@ -222,6 +222,7 @@ exports.updateDonation = async (req, res) => {
         // Find the donation by ID and update it
         const donation = await Donate.findById(donationId);
         if (!donation) {
+            logger.warn(`Donation not found at ${donationId}`);
             return res.status(404).json({ message: "Donation not found" });
         }
 
@@ -235,13 +236,13 @@ exports.updateDonation = async (req, res) => {
 
         // Save the updated donation
         await donation.save();
-
+        logger.info(`Donation is updated`);
         return res.status(200).json({
             message: "Donation updated successfully.",
             donation,
         });
     } catch (error) {
-        console.error("Error updating donation:", error);
+        logger.error("Error updating donation:", error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };

@@ -8,6 +8,7 @@ exports.createServices = async (req, res) => {
 
         // validating the data 
         if (!title || !description || !req.files || req.files.length === 0) {
+            logger.warn(`Fields are not valid`);
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -18,6 +19,7 @@ exports.createServices = async (req, res) => {
                 const cloudinaryResponse = await uploadOnCloudinary(file.path);
                 imageUrls.push(cloudinaryResponse.secure_url);
             } catch (uploadError) {
+                logger.error(`Upload Image Failed`,error);
                 return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
             }
         }
@@ -34,12 +36,14 @@ exports.createServices = async (req, res) => {
 
         // checking if service is created or not
         if (!service) {
+            logger.warn(`Service is Required`);
             return res.status(500).json({ message: "Service not created" });
         }
-
+        logger.info(`Service created successfully`);
         // return response
         return res.status(201).json({ message: "Service created successfully" });
     } catch (error) {
+        logger.error(`Created Services Failed`,error);
         return res.statsu(500).json({ message: "Internal Server Error" })
     }
 }
@@ -51,13 +55,15 @@ exports.getServices = async (req, res) => {
 
         // checking if Services is found
         if (!services) {
+            logger.warn(`Service is Required`);
             return res.status(500).json({ message: "Services not found" });
         }
-
+        logger.info(`Fetched Services Successfully`);
         // return response
         return res.status(200).json({ data: services });
 
     } catch (error) {
+        logger.error(`Getting Services Failed`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }
@@ -69,6 +75,7 @@ exports.getSingleService = async (req, res) => {
 
         // checking if service id is provided or not
         if (!serviceId) {
+            logger.warn(`Service is Required`);
             return res.status(400).json({ message: "Service Id is required" });
         }
 
@@ -77,12 +84,14 @@ exports.getSingleService = async (req, res) => {
 
         // checking if service is found
         if (!singleService) {
+            logger.warn(`Service Not Found at ${serviceId}`);
             return res.status(500).json({ message: "Service not found" });
         }
 
         // return response
         return res.status(200).json({ data: singleService });
     } catch (error) {
+        logger.error(`Fetching Single Services Failed`,error);
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }

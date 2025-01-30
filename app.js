@@ -45,7 +45,6 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 // app.use(expressLogger);
 
-// check heartbeat
 
 app.use('/api/isckcon', routes);
 // app.use((req, res, next) => {

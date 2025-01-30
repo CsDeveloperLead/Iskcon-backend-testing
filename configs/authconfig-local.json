@@ -1,0 +1,7 @@
+{
+    "jwtSecretKey": ["2f9e372fe963db3c9f7ecec38c5ac7da6232aa424d9d7396d65bd8df065cb422"],
+    "cryptoKey": ["d6378782a24d1a7b1934ad6b6cc50acc"],
+    "jwtExpiresIn": false,
+    "cryptoAlgo": "aes-256-cbc",
+    "ivLength": 16
+}

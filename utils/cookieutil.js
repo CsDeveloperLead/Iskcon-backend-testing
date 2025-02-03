@@ -102,9 +102,3 @@ exports.getDecodedValue = function(token){
 	return decoded;
 };
 
-// let getDecodedValueV1 = function(encodedString){
-// 	let bytes = base64.decode(encodedString);
-// 	let decValueStr = utf8.decode(bytes);
-// 	let decValueObj = JSON.parse(decValueStr);
-// 	return decValueObj;
-// };

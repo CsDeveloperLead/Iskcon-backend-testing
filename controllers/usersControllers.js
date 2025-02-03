@@ -30,7 +30,7 @@ exports.signup = async (req, res) => {
         if (email) userData.email = email;
         if (phone_no) userData.phone_no = phone_no;
 
-        const user = await User.create(userData);
+        const user = await User.create(userData,);
         if (!user) {
             return res.status(500).json({ message: "User not created" });
         }
@@ -148,80 +148,75 @@ exports.removeUser = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const { email, password, name, phone_no } = req.body;
+        const { email, password, phone_no } = req.body;
 
+        if (!email && !phone_no) {
+            return res.status(400).json({ message: "Email or Phone number is required" });
+        }
+
+        let user;
         if (email) {
-            if (!email || !password || !name) {
-                return res.status(400).json({ message: "All fields are required" });
-            }
+            user = await User.findOne({ email });
+        } else {
+            user = await User.findOne({ phone_no });
+        }
 
-            const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-            if (!user) {
-                return res.status(404).json({ message: "User not found" });
-            }
+        // Check if password is correct
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
 
-            const isMatch = await bcrypt.compare(password, user.password);
-
-            if (!isMatch) {
-                return res.status(401).json({ message: "Invalid credentials" });
-            }
-
+        // If user is an admin, no need to check OTP or additional fields
+        if (user.user_role === "iskcon-admin") {
             const token = getEncodedCookie({
                 id: user.userId,
                 role: user.user_role,
                 name: user.name,
                 email: user.email,
-            })
+            });
 
             const options = {
-                httpOnly: true,
-                secure: false // change this to true when hosting the app
-            }
+                httpOnly: false,
+                secure: true, // Change to true in production
+            };
 
             return res
                 .status(200)
                 .cookie("AuthToken", token, options)
                 .json({
-                    message: "Login Successfully",
-                })
-        } else {
-            if (!phone_no || !password || !name) {
-                return res.status(400).json({ message: "All fields are required" });
-            }
-
-            const user = await User.findOne({ phone_no });
-
-            if (!user) {
-                return res.status(404).json({ message: "User not found" });
-            }
-
-            const isMatch = await bcrypt.compare(password, user.password);
-
-            if (!isMatch) {
-                return res.status(401).json({ message: "Invalid credentials" });
-            }
-
-            const token = getEncodedCookie({
-                id: user.userId,
-                role: user.user_role,
-                name: user.name,
-                phone_no: user.phone_no,
-            })
-
-            const options = {
-                httpOnly: true,
-                secure: false // change this to true when hosting the app
-            }
-
-            return res
-                .status(200)
-                .cookie("AuthToken", token, options)
-                .json({
-                    message: "Login Successfully",
-                })
+                    message: "Admin Login Successfully",
+                    role: user.user_role,
+                });
         }
+
+        // For normal users (iskcon-user), continue with OTP or other verification
+        const token = getEncodedCookie({
+            id: user.userId,
+            role: user.user_role,
+            name: user.name,
+            email: user.email,
+            phone_no: user.phone_no,
+        });
+
+        const options = {
+            httpOnly: false,
+            secure: true, // Change to true in production
+        };
+
+        return res
+            .status(200)
+            .cookie("AuthToken", token, options)
+            .json({
+                message: "User Login Successfully",
+                role: user.user_role,
+            });
     } catch (error) {
         return errorConfig(error, req, res);
     }
-}
+};
+

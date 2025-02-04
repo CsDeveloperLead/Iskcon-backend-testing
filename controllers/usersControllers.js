@@ -184,16 +184,17 @@ exports.login = async (req, res) => {
     });
 
     // Set cookie options
-    
 
     // Set the cookie
-   
 
     // Return response with token
     return res.status(200).json({
-      message: user.user_role === "iskcon-admin" ? "Admin Login Successfully" : "User Login Successfully",
+      message:
+        user.user_role === "iskcon-admin"
+          ? "Admin Login Successfully"
+          : "User Login Successfully",
       role: user.user_role,
-      token: token
+      token: token,
     });
   } catch (error) {
     return errorConfig(error, req, res);

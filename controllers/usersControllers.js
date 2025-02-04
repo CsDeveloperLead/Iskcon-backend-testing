@@ -184,7 +184,7 @@ exports.login = async (req, res) => {
             const options = {
                 httpOnly: false,
                 secure: true, // Change to true in production
-                samesite : 'none'
+                sameSite : 'none'
             };
 
             return res
@@ -208,7 +208,7 @@ exports.login = async (req, res) => {
         const options = {
             httpOnly: false,
             secure: true, // Change to true in production
-            samesite : 'none'
+            sameSite : 'none'
         };
 
         return res

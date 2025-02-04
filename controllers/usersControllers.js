@@ -174,30 +174,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // If user is an admin, no need to check OTP or additional fields
-    if (user.user_role === "iskcon-admin") {
-      const token = getEncodedCookie({
-        id: user.userId,
-        role: user.user_role,
-        name: user.name,
-        email: user.email,
-      });
-
-      const options = {
-        httpOnly: false,
-        secure: true, // Change to true in production
-        sameSite: "none",
-        path: "/", // Ensure cookies are available across all paths
-        maxAge: 24 * 60 * 60 * 1000, // Set expiration (optional)
-      };
-
-      return res.status(200).cookie("AuthToken", token, options).json({
-        message: "Admin Login Successfully",
-        role: user.user_role,
-      });
-    }
-
-    // For normal users (iskcon-user), continue with OTP or other verification
+    // Generate token
     const token = getEncodedCookie({
       id: user.userId,
       role: user.user_role,
@@ -206,17 +183,17 @@ exports.login = async (req, res) => {
       phone_no: user.phone_no,
     });
 
-    const options = {
-      httpOnly: false,
-      secure: true, // Change to true in production
-      sameSite: "none",
-      path: "/", // Ensure cookies are available across all paths
-      maxAge: 30* 24 * 60 * 60 * 1000, // Set expiration (optional)
-    };
+    // Set cookie options
+    
 
-    return res.status(200).cookie("AuthToken", token, options).json({
-      message: "User Login Successfully",
+    // Set the cookie
+   
+
+    // Return response with token
+    return res.status(200).json({
+      message: user.user_role === "iskcon-admin" ? "Admin Login Successfully" : "User Login Successfully",
       role: user.user_role,
+      token: token
     });
   } catch (error) {
     return errorConfig(error, req, res);

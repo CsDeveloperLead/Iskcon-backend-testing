@@ -4,7 +4,7 @@ const moment = require("moment-timezone");
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    email: { type: String, unique: true, sparse: true },
+    email: { type: String, unique: true, sparse: true ,lowercase:true},
     phone_no: { type: String, unique: true, sparse: true },
     password: { type: String, required: true },
     user_role: { type: String, required: true, default: "iskcon-user" },

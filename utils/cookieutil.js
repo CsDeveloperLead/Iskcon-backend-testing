@@ -7,6 +7,8 @@ const path = require('path');
 const { logger } = require('./logger');
 const secretKeysPath = `../configs/authconfig-${(process.env.NODE_ENV).toLowerCase()}.json`;
 
+
+logger.info("Logger is working")
 if(!fs.existsSync(path.join(__dirname,secretKeysPath))){
 	// logger.error("AuthConfig file not found. Stopping the Iskcon API");
 	process.exit(1);

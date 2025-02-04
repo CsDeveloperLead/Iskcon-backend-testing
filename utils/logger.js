@@ -1,40 +1,47 @@
 const fs = require('fs');
 const pino = require('pino');
 const moment = require('moment-timezone');
-const pino_http = require('pino-http');
-const request_context = require('request-context');
+const pinoHttp = require('pino-http');
+const requestContext = require('request-context');
 require('dotenv').config();
 
-console.log(process.env.LOG_LEVEL);
+// Retrieve log level from environment variables or default to 'info'
+const defaultLogLevel = process.env.LOG_LEVEL || 'info';
 
 const logLevels = {
-  levels: {
-    trace: 0,
+    levels: {
+    trace: 10,
     debug: 20,
     info: 30,
     warn: 40,
     error: 50,
-    fatal: 60
+    fatal: 60,
   },
-  useOnlyCustom: true
+  useOnlyCustom: true,
 };
 
-const logDestination = process.stdout; // Can be changed to a file stream or any other writable stream
-const logger = pino(logLevels, {
-  level: process.env.LOG_LEVEL || 'info',
+
+if (!logLevels.levels[defaultLogLevel]) {
+  throw new Error(`Default level '${defaultLogLevel}' must be included in custom levels.`);
+}
+
+const logDestination = process.stdout; // Change to a file stream if needed
+const logger = pino({
+  customLevels: logLevels.levels,
+  useOnlyCustomLevels: logLevels.useOnlyCustom,
+  level: defaultLogLevel,
   mixin() {
     return {
-      requestId: request_context.get('apirequest:requestid') || '',
-      client: request_context.get('apirequest:client') || '',
-      user: request_context.get('apirequest:iskconUser') || '',
+      requestId: requestContext.get('apirequest:requestid') || '',
+      client: requestContext.get('apirequest:client') || '',
+      user: requestContext.get('apirequest:iskconUser') || '',
     };
   },
   redact: ['req.headers["x-api-key"]', 'req.headers["dm_token"]'],
-  timestamp: () => `"timestamp":"${moment().tz("Asia/Kolkata").format('YYYY-MM-DDTHH:mm:ss.SSS')}"`,
-  destination: logDestination // Ensure this is a writable stream
-});
+  timestamp: () => `,\"timestamp\":\"${moment().tz("Asia/Kolkata").format('YYYY-MM-DDTHH:mm:ss.SSS')}\"`,
+}, pino.destination(logDestination));
 
-const expressLogger = pino_http({
+const expressLogger = pinoHttp({
   logger: logger,
   serializers: {
     req(req) {
@@ -44,5 +51,9 @@ const expressLogger = pino_http({
   },
 });
 
-module.exports.expressLogger = expressLogger;
-module.exports.logger = logger;
+module.exports = {
+  expressLogger,
+  logger,
+};
+
+ 

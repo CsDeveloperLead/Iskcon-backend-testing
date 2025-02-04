@@ -4,6 +4,7 @@ const { getEncodedCookie, getDecodedValue } = require("../utils/cookieutil");
 const bcrypt = require("bcrypt");
 
 const { sendVerificationEmail } = require('../services/emailVerify');
+const { SchemaTypes } = require("mongoose");
 
 const generateOTP = () => {
     return Math.floor(1000 + Math.random() * 9000).toString();
@@ -183,6 +184,7 @@ exports.login = async (req, res) => {
             const options = {
                 httpOnly: false,
                 secure: true, // Change to true in production
+                samesite : 'none'
             };
 
             return res
@@ -206,6 +208,7 @@ exports.login = async (req, res) => {
         const options = {
             httpOnly: false,
             secure: true, // Change to true in production
+            samesite : 'none'
         };
 
         return res

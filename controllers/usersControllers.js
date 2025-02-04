@@ -209,9 +209,9 @@ exports.login = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true, // Change to true in production
-      sameSite: "lax",
+      sameSite: "none",
       path: "/", // Ensure cookies are available across all paths
-      maxAge: 24 * 60 * 60 * 1000, // Set expiration (optional)
+      maxAge: 30* 24 * 60 * 60 * 1000, // Set expiration (optional)
     };
 
     return res.status(200).cookie("AuthToken", token, options).json({

@@ -184,7 +184,7 @@ exports.login = async (req, res) => {
       });
 
       const options = {
-        httpOnly: false,
+        httpOnly: true,
         secure: true, // Change to true in production
         sameSite: "lax",
         path: "/", // Ensure cookies are available across all paths
@@ -207,7 +207,7 @@ exports.login = async (req, res) => {
     });
 
     const options = {
-      httpOnly: false,
+      httpOnly: true,
       secure: true, // Change to true in production
       sameSite: "lax",
       path: "/", // Ensure cookies are available across all paths

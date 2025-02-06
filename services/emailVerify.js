@@ -1,4 +1,5 @@
 const User = require("../models/users");
+const nodemailer = require("nodemailer")
 
 exports.sendVerificationEmail = async (email, message, subject) => {
   try {

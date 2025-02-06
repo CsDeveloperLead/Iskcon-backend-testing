@@ -7,7 +7,6 @@ let salt_key = process.env.SALT_KEY1;
 
 
 exports.createOrder = async (req, res) => {
-  console.log("Entered createOrder");
 
   const {
     userId,
@@ -41,13 +40,11 @@ exports.createOrder = async (req, res) => {
 
   };
 
-  console.log(orderData);
 
   try {
     // Save order to the database
     const newOrder = new Order(orderData);
     await newOrder.save();
-    console.log("Proceeding with payment for order:", orderData);
 
     // Prepare payload for the payment request
     const keyIndex = 1;
@@ -78,14 +75,11 @@ exports.createOrder = async (req, res) => {
     await axios(options)
       .then((response) => {
         res.json(response.data); // Send payment response to the frontend
-        console.log("payment success response send to fromtend",response);
       })
       .catch((error) => {
-        console.log(error);
         res.status(500).send("Payment request failed");
       });
   } catch (error) {
-    console.log("Error saving order:", error);
     res.status(500).send("Failed to create order");
   }
 };
@@ -141,7 +135,6 @@ exports.status = async (req, res) => {
         });
       }
     } catch (error) {
-      console.log('Error checking payment status:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   };

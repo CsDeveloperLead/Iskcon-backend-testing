@@ -19,7 +19,6 @@ function signUpValidation(req,res,next) {
         isIskconMembership: Joi.boolean()
     });
     const {error} = schema.validate(req.body);
-    console.log('Validation Error :::::', error);
     // if(error){
     //     return errorHandler(error, req, res);
     // }

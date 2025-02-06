@@ -65,7 +65,6 @@ app.listen(PORT, () => {
     setInterval(async () => {
         try {
             const response = await axios.get('https://iskcon-backend-testing-pcnv.onrender.com/health')
-            console.log(response.data)
         } catch (error) {
             console.error('Health check failed:', error)
         }

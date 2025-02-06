@@ -18,7 +18,6 @@ const createProduct = async (req, res) => {
       try {
         const cloudinaryResponse = await uploadOnCloudinary(file.path);
         imageUrls.push(cloudinaryResponse.secure_url);
-        console.log(`Uploaded image: ${cloudinaryResponse.secure_url}`);
       } catch (uploadError) {
         console.error("Image upload failed:", uploadError.message);
         return res.status(500).json({ message: "Image upload failed", error: uploadError.message });

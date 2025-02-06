@@ -22,7 +22,6 @@ let crypto;
 try{
     crypto = require('crypto');
 }catch(err){
-    console.log('Crypto Error:::', err);
     logger.error('crypto support is disabled');
 }
 
@@ -54,62 +53,6 @@ exports.getEncodedCookie = function(payLoad){
 	}
 	return token;
 };
-
-
-// const decrypt = (data) => {
-//     let decrypted;
-//     let ivDecryptLength = 2 * ivLength; //iv string is concatenation of iv buffered bytes
-//     let iv = Buffer.from(data.slice(0, ivDecryptLength), 'hex');
-//     let encryptedText = Buffer.from(data.slice(ivDecryptLength), 'hex');
-//         for(let i=0;i<cryptoKey.length;i++){
-//             try{
-//                 let decipher = crypto.createDecipheriv(cryptoAlgo, Buffer.from(cryptoKey[i]), iv); // create decipher from cryptoKey value. 
-//                 decrypted = decipher.update(encryptedText);
-//                 decrypted = Buffer.concat([decrypted, decipher.final()]);
-//                 break;
-
-//             }catch(err){
-//                     logger.error('Unable to decrypt from cryptoKey',i);
-//                     logger.error(err);
-
-//             }
-//         }
-//     return decrypted.toString();
-// }
-// exports.getDecodedValue = function(token){
-// 	let decoded='', decodedJWT='';
-// 	console.log("got token in function",token)
-	
-// 	try {
-// 		for(let i =0;i<jwtSecretKey.length;i++) {
-// 			try {
-				
-// 				decodedJWT = jwt.verify(token, jwtSecretKey[i]);
-// 				let decipher = decrypt(decodedJWT.info);
-// 				console.log(decipher)
-// 				decoded = JSON.parse(decipher);
-// 				console.log("mila",decoded)
-// 				if(i != 0) {
-// 					let res = exports.getEncodedCookie(decoded); // generate new token for old token.
-// 					decoded['dm_token'] = res;
-// 					return decoded;
-// 				}
-// 				break;
-// 			}
-// 			catch(err) {
-// 				if(err.name === 'JsonWebTokenError' && i < jwtSecretKey.length - 1) {
-// 					logger.error("Invalid Signature for " , i);
-// 				}
-// 				else {
-// 					logger.error(err);
-// 				}
-// 			}
-// 		}
-// 	} catch (error) {
-// 		decoded = getDecodedValueV1(token);
-// 	}
-// 	return decoded;
-// };
 
 const decrypt = (encryptedData) => {
     try {

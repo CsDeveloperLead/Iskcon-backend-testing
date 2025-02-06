@@ -23,7 +23,6 @@ router.post("/",async (req, res) => {
       };
   
       const info = await transporter.sendMail(mailOptions);
-      console.log("✅ Contact Email sent:", info.messageId);
       res.status(200).json({ message: "Message sent successfully!" });
     } catch (error) {
       console.error("❌ Error sending contact email:", error);

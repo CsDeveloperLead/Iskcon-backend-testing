@@ -1,4 +1,4 @@
-const Order = require("../models/order");
+const Donation = require("../models/donationModel");
 const crypto = require("crypto");
 const axios = require("axios");
 require("dotenv").config();
@@ -6,15 +6,15 @@ let merchantId = process.env.MERCHANT_ID1;
 let salt_key = process.env.SALT_KEY1;
 
 
-exports.createOrder = async (req, res) => {
+exports.createDonationOrder = async (req, res) => {
 
   const {
     userId,
     amount,
     shippingAddress,
     paymentDetails, // Default to empty if missing
-    orderStatus,
-    orderItems,
+    donationOrderStatus,
+    donationItems,
     contact,
     transactionId,
   } = req.body;
@@ -26,11 +26,11 @@ exports.createOrder = async (req, res) => {
     amount : amount * 100,
     shippingAddress,
     paymentDetails,
-    orderStatus,
-    orderItems,
+    donationOrderStatus,
+    donationItems,
     contact,
     transactionId,
-    redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
+    redirectUrl: `${process.env.FRONTEND_URL2}/${transactionId}`,
     callbackUrl: `http://localhost:5173`,
     redirectMode: "REDIRECT",
     paymentInstrument: {
@@ -43,8 +43,8 @@ exports.createOrder = async (req, res) => {
 
   try {
     // Save order to the database
-    const newOrder = new Order(orderData);
-    await newOrder.save();
+    const newDonation = new Donation(orderData);
+    await newDonation.save();
 
     // Prepare payload for the payment request
     const keyIndex = 1;
@@ -84,7 +84,7 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-exports.status = async (req, res) => {
+exports.status2 = async (req, res) => {
     const { id: merchantTransactionId } = req.query; // Extract transaction ID from query
     const keyIndex = 1;
   
@@ -110,12 +110,12 @@ exports.status = async (req, res) => {
   
       if (response.data.success) {
         // Payment is successful, update the order status in the database
-        await Order.findOneAndUpdate(
+        await Donation.findOneAndUpdate(
             { transactionId: merchantTransactionId }, // Use transactionId, not merchantTransactionId
             {
                 $set: {
                     "paymentDetails.paymentStatus": "PAID",
-                    orderStatus: "CONFIRMED",
+                    donationOrderStatus: "CONFIRMED",
                 },
             },
             { new: true } 
@@ -141,7 +141,7 @@ exports.status = async (req, res) => {
   
 
 // this controller is for getting all orders
-exports.getOrders = async (req, res) => {
+exports.getOrders2 = async (req, res) => {
   try {
     const orders = await Order.find();
 
@@ -158,7 +158,7 @@ exports.getOrders = async (req, res) => {
 };
 
 // this controller is for getting single order
-exports.getSingleOrder = async (req, res) => {
+exports.getSingleOrder2 = async (req, res) => {
 
   try {
     const { transactionId } = req.params; // Corrected this line
@@ -170,9 +170,8 @@ exports.getSingleOrder = async (req, res) => {
     }
 
     // Fetching the order
-    const order = await Order.findOne({ transactionId }).populate("orderItems.productId");
+    const order = await Donation.findOne({ transactionId })
 
-    console.log(order)
 
     // Checking if order is found
     if (!order) {
@@ -190,7 +189,7 @@ exports.getSingleOrder = async (req, res) => {
 
 
 // this controller is for deleting order
-exports.deleteOrder = async (req, res) => {
+exports.deleteOrder2 = async (req, res) => {
   try {
     const { orderId } = req.params;
 
@@ -215,7 +214,7 @@ exports.deleteOrder = async (req, res) => {
 };
 
 // this controller is for getting orders by specific user
-exports.orderBySpecificUser = async (req, res) => {
+exports.orderBySpecificUser2 = async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -240,7 +239,7 @@ exports.orderBySpecificUser = async (req, res) => {
 };
 
 // this controller is for updating status of order only admin can hit this route
-exports.updateOrderStatus = async (req, res) => {
+exports.updateOrderStatus2 = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;

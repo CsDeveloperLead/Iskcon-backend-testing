@@ -7,6 +7,7 @@ let merchantId = process.env.MERCHANT_ID1;
 let salt_key = process.env.SALT_KEY1;
 
 exports.createDonationOrder = async (req, res) => {
+    console.log("hello")
   const {
     userId,
     amount,
@@ -18,6 +19,9 @@ exports.createDonationOrder = async (req, res) => {
     transactionId,
   } = req.body;
 
+  console.log(req.body);
+
+  
   const donationData = {
     merchantId: merchantId,
     userId,
@@ -36,6 +40,7 @@ exports.createDonationOrder = async (req, res) => {
     },
     merchantTransactionId: transactionId,
   };
+  console.log("hello",donationData);
 
   try {
     const newDonationOrder = new DonationOrder(donationData);
@@ -63,7 +68,9 @@ exports.createDonationOrder = async (req, res) => {
     await axios(options)
       .then((response) => res.json(response.data))
       .catch(() => res.status(500).send("Payment request failed"));
+      
   } catch (error) {
+    console.log(error);
     res.status(500).send("Failed to create donation order");
   }
 };

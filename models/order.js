@@ -2,6 +2,7 @@
 const { required } = require("joi");
 const mongoose = require("mongoose");
 const moment = require("moment-timezone");
+const product = require("./product");
 
 // Define the Order schema
 const orderSchema = new mongoose.Schema({
@@ -19,6 +20,7 @@ const orderSchema = new mongoose.Schema({
   orderItems: [
     {
       productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+      name: { type: String, required: true },
       quantity: { type: Number, required: true },
       price: { type: Number, required: true },
     },

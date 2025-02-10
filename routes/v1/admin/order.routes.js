@@ -10,6 +10,7 @@ router.delete('/delete/:orderId', deleteOrder); // to delete order
 router.get('/get/orderBySpecificUser/:userId', orderBySpecificUser); // to get order by specific user
 router.put('/updateStatus/:orderId', updateOrderStatus); // to update order status
 router.get('/status', status);
+router.get('/:transactionId', getSingleOrder);
 
 
 

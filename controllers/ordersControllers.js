@@ -159,27 +159,37 @@ exports.getOrders = async (req, res) => {
 
 // this controller is for getting single order
 exports.getSingleOrder = async (req, res) => {
+  console.log("Entered");
+
   try {
-    const { merchantTransactionId } = req.params;
+    const { transactionId } = req.params; // Corrected this line
 
-    // checking if orderId is provided
-    if (!merchantTransactionId) {
-      return res.status(400).json({ message: "Order Id is required" });
+    console.log("Found transactionId:", transactionId);
+
+    // Checking if transactionId is provided
+    if (!transactionId) {
+      return res.status(400).json({ message: "Order ID is required" });
     }
 
-    // getting single order
-    const order = await Order.findOne({ transactionId });
-    // checking if order is found
-    if (!singleOrder) {
-      return res.status(500).json({ message: "Order not found" });
+    // Fetching the order
+    const order = await Order.findOne({ transactionId }).populate("orderItems.productId");
+
+    console.log(order)
+
+    // Checking if order is found
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    // return response
-    return res.status(200).json({ data: singleOrder });
+    // Returning the order data
+    return res.status(200).json({ data: order });
   } catch (error) {
+    console.error("Error fetching order:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
 
 // this controller is for deleting order
 exports.deleteOrder = async (req, res) => {

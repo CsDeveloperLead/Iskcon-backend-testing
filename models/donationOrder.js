@@ -17,9 +17,10 @@ const donationOrderSchema = new mongoose.Schema({
   donationItems: [
     {
       donationItemId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "DonationItem",
+        type: String,
+        required: true,
       },
+      title: { type: String, required: true },
       quantity: { type: Number, required: true },
       amount: { type: Number, required: true },
     },
@@ -58,7 +59,7 @@ const donationOrderSchema = new mongoose.Schema({
   },
   donationStatus: {
     type: String,
-    enum: ["PENDING", "CONFIRMED", "COMPLETED"],
+    enum: ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"],
     default: "PENDING",
     required: true,
   },

@@ -3,8 +3,8 @@ const crypto = require("crypto");
 const axios = require("axios");
 require("dotenv").config();
 
-let merchantId = process.env.MERCHANT_ID2;
-let salt_key = process.env.SALT_KEY2;
+let merchantId = process.env.MERCHANT_ID1;
+let salt_key = process.env.SALT_KEY1;
 
 exports.createDonationOrder = async (req, res) => {
   const {
@@ -28,7 +28,7 @@ exports.createDonationOrder = async (req, res) => {
     donationItems,
     contact,
     transactionId,
-    redirectUrl: `${process.env.FRONTEND_URL2}/${transactionId}`,
+    redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
     callbackUrl: `http://localhost:5173`,
     redirectMode: "REDIRECT",
     paymentInstrument: {
@@ -47,7 +47,7 @@ exports.createDonationOrder = async (req, res) => {
     const string = payloadMain + "/pg/v1/pay" + salt_key;
     const sha256 = crypto.createHash("sha256").update(string).digest("hex");
     const checksum = sha256 + "###" + keyIndex;
-    const prod_URL = process.env.PHONEPAY_API2;
+    const prod_URL = process.env.PHONEPAY_API1;
 
     const options = {
       method: "POST",
@@ -81,7 +81,7 @@ exports.donationStatus = async (req, res) => {
     const options = {
       method: "GET",
       url:
-        process.env.STATUS_API2 +
+        process.env.STATUS_API1 +
         `/pg/v1/status/${merchantId}/${merchantTransactionId}`,
       headers: {
         accept: "application/json",
@@ -105,21 +105,17 @@ exports.donationStatus = async (req, res) => {
         { new: true }
       );
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Payment successful",
-          amount: response.data.data.amount,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Payment successful",
+        amount: response.data.data.amount,
+      });
     } else {
-      res
-        .status(200)
-        .json({
-          success: false,
-          message: "Payment failed",
-          reason: response.data.data.message,
-        });
+      res.status(200).json({
+        success: false,
+        message: "Payment failed",
+        reason: response.data.data.message,
+      });
     }
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });

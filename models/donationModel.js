@@ -7,15 +7,15 @@ const product = require("./product");
 // Define the Order schema
 const donationSchema = new mongoose.Schema({
   donationId: {
-    type: mongoose.Schema.Types.UUID, // UUID type
+    type: String, // UUID type
     default: () => require("uuid").v4(), // Automatically generate UUID
     required: true,
     unique: true,
   },
   userId: {
-    type: mongoose.Schema.Types.UUID, 
-    required: true,
-    ref: "User", 
+  type: String, 
+  required: true,
+  ref: "User", 
   },
   donationItems: [
     {

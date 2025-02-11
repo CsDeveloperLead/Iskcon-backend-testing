@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express = require("express");
-// const express_request_id = require('express-request-id');
-// const request_context = require('request-context');
-// const errorconfig = require('./helpers/errorconfig');
+const express_request_id = require("express-request-id");
+const request_context = require("request-context");
+const errorconfig = require("./helpers/errorconfig");
 const { logger, expressLogger } = require("./utils/logger");
 const cors = require("cors");
 const { errorHandler } = require("./middlewares/errorHandler");
@@ -20,6 +20,9 @@ const PORT = process.env.PORT || 8080;
 // }
 
 // Dynamic Origin handling
+
+//app.use(expressLogger);
+
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
@@ -42,17 +45,19 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+
+// logger.info(express_request_id());
 // app.use(express_request_id());
-// app.use(request_context.default.middleware('apirequest'));
+// app.use(request_context.middleware("apirequest"));
 // app.use((req, _, next) => {
-//     request_context.set('apirequest:requestid', req['id']);
-//     request_context.set('apirequest:apikey', req.headers['x-api-key']);
-//     request_context.set('apirequest:IskconUser', req.headers['x-userid']);
-//     next();
+//   request_context.set("apirequest:requestid", req["id"]);
+//   request_context.set("apirequest:apikey", req.headers["x-api-key"]);
+//   request_context.set("apirequest:IskconUser", req.headers["x-userid"]);
+//   next();
 // });
+
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(expressLogger);
 
 app.use("/api/isckcon", routes);
 // app.use((req, res, next) => {
@@ -65,7 +70,7 @@ app.get("/health", (req, res) => {
 });
 
 process.on("uncaughtException", (err) => {
-  // logger.error(err);
+  logger.error(err);
 });
 
 app.listen(PORT, () => {

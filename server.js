@@ -43,4 +43,4 @@ const connectToMongoDB = async () => {
 
 connectToMongoDB();
 
-mongoose.set("debug", process.env.NODE_ENV !== "production");
+mongoose.set("debug", false);

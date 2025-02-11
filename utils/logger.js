@@ -30,7 +30,7 @@ if (!logLevels.levels[defaultLogLevel]) {
 const logDestination = process.stdout; // Change to a file stream if needed
 
 // Custom Logger
-const logger = pino(
+const loggerInstance = pino(
   {
     customLevels: logLevels.levels,
     useOnlyCustomLevels: logLevels.useOnlyCustom,
@@ -51,42 +51,64 @@ const logger = pino(
   logDestination
 );
 
-const originalError = logger.error;
-logger.error = function (...args) {
-  const [message, error] = args;
-  if (error instanceof Error) {
-    return originalError.call(logger, {
-      message,
-      errorMessage: error.message,
-      stack: error.stack,
-    });
-  }
-  return originalError.call(logger, message);
+// ✅ Separate Functions for Logging (Including `trace` and `fatal`)
+const logger = {
+  trace: function (...args) {
+    const [message, data] = args;
+    if (data) {
+      return loggerInstance.trace({ message, data });
+    }
+    return loggerInstance.trace({ message });
+  },
+
+  debug: function (...args) {
+    const [message, data] = args;
+    if (data) {
+      return loggerInstance.debug({ message, data });
+    }
+    return loggerInstance.debug({ message });
+  },
+
+  info: function (...args) {
+    const [message, data] = args;
+    if (data) {
+      return loggerInstance.info({ message, data });
+    }
+    return loggerInstance.info({ message });
+  },
+
+  warn: function (...args) {
+    const [message, data] = args;
+    if (data) {
+      return loggerInstance.warn({ message, data });
+    }
+    return loggerInstance.warn({ message });
+  },
+
+  error: function (...args) {
+    const [message, error] = args;
+    if (error instanceof Error) {
+      return loggerInstance.error({
+        message,
+        errorMessage: error.message,
+        stack: error.stack,
+      });
+    }
+    return loggerInstance.error({ message, error });
+  },
+
+  fatal: function (...args) {
+    const [message, data] = args;
+    if (data) {
+      return loggerInstance.fatal({ message, data });
+    }
+    return loggerInstance.fatal({ message });
+  },
 };
 
-const originalWarn = logger.warn;
-logger.warn = function (...args) {
-  const [message, data] = args;
-  if (data) {
-    return originalWarn.call(logger, { message, data });
-  }
-  return originalWarn.call(logger, message);
-};
-
-const originalDebug = logger.debug;
-logger.debug = function (...args) {
-  if (args.length > 1) {
-    return originalDebug.call(logger, {
-      message: args[0],
-      data: args.slice(1),
-    });
-  }
-  return originalDebug.call(logger, ...args);
-};
-
-// Express Logger
+// Express Logger Middleware
 const expressLogger = pinoHttp({
-  logger: logger,
+  logger: loggerInstance,
   serializers: {
     req(req) {
       req.body = req.raw.body;

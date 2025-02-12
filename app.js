@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 8080;
 
 // Dynamic Origin handling
 
-//app.use(expressLogger);
+app.use(expressLogger);
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -46,15 +46,14 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// logger.info(express_request_id());
-// app.use(express_request_id());
-// app.use(request_context.middleware("apirequest"));
-// app.use((req, _, next) => {
-//   request_context.set("apirequest:requestid", req["id"]);
-//   request_context.set("apirequest:apikey", req.headers["x-api-key"]);
-//   request_context.set("apirequest:IskconUser", req.headers["x-userid"]);
-//   next();
-// });
+app.use(express_request_id());
+app.use(request_context.middleware("apirequest"));
+app.use((req, _, next) => {
+  request_context.set("apirequest:requestid", req["id"]);
+  request_context.set("apirequest:apikey", req.headers["x-api-key"]);
+  request_context.set("apirequest:IskconUser", req.headers["x-userid"]);
+  next();
+});
 
 app.use(cookieParser());
 app.use(bodyParser.json());

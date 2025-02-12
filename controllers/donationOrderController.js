@@ -1,20 +1,19 @@
-const Order = require("../models/order");
+const Donation = require("../models/donationModel");
 const crypto = require("crypto");
 const axios = require("axios");
+const User = require("../models/users");
 require("dotenv").config();
 let merchantId = process.env.MERCHANT_ID1;
 let salt_key = process.env.SALT_KEY1;
 
-
-exports.createOrder = async (req, res) => {
-
+exports.createDonationOrder = async (req, res) => {
   const {
     userId,
     amount,
     shippingAddress,
     paymentDetails, // Default to empty if missing
-    orderStatus,
-    orderItems,
+    donationOrderStatus,
+    donationItems,
     contact,
     transactionId,
   } = req.body;
@@ -23,28 +22,26 @@ exports.createOrder = async (req, res) => {
   const orderData = {
     merchantId: merchantId,
     userId,
-    amount : amount * 100,
+    amount: amount * 100,
     shippingAddress,
     paymentDetails,
-    orderStatus,
-    orderItems,
+    donationOrderStatus,
+    donationItems,
     contact,
     transactionId,
-    redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
+    redirectUrl: `${process.env.FRONTEND_URL2}/${transactionId}`,
     callbackUrl: `http://localhost:5173`,
     redirectMode: "REDIRECT",
     paymentInstrument: {
       type: "PAY_PAGE",
     },
     merchantTransactionId: transactionId,
-
   };
-
 
   try {
     // Save order to the database
-    const newOrder = new Order(orderData);
-    await newOrder.save();
+    const newDonation = new Donation(orderData);
+    await newDonation.save();
 
     // Prepare payload for the payment request
     const keyIndex = 1;
@@ -70,7 +67,6 @@ exports.createOrder = async (req, res) => {
       },
     };
 
-    
     // Send payment request
     await axios(options)
       .then((response) => {
@@ -84,85 +80,98 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-exports.status = async (req, res) => {
-    const { id: merchantTransactionId } = req.query; // Extract transaction ID from query
-    const keyIndex = 1;
-  
-    try {
-      // Construct the string for generating checksum
-      const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + salt_key;
-      const sha256 = crypto.createHash('sha256').update(string).digest('hex');
-      const checksum = sha256 + '###' + keyIndex;
-  
-      // Call the PhonePe status API
-      const options = {
-        method: 'GET',
-        url: process.env.STATUS_API1 + `/pg/v1/status/${merchantId}/${merchantTransactionId}`,
-        headers: {
-          accept: 'application/json',
-          'Content-Type': 'application/json',
-          'X-VERIFY': checksum,
-          'X-MERCHANT-ID': merchantId,
+exports.status2 = async (req, res) => {
+  const { id: merchantTransactionId } = req.query; // Extract transaction ID from query
+  const keyIndex = 1;
+
+  try {
+    // Construct the string for generating checksum
+    const string =
+      `/pg/v1/status/${merchantId}/${merchantTransactionId}` + salt_key;
+    const sha256 = crypto.createHash("sha256").update(string).digest("hex");
+    const checksum = sha256 + "###" + keyIndex;
+
+    // Call the PhonePe status API
+    const options = {
+      method: "GET",
+      url:
+        process.env.STATUS_API1 +
+        `/pg/v1/status/${merchantId}/${merchantTransactionId}`,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        "X-VERIFY": checksum,
+        "X-MERCHANT-ID": merchantId,
+      },
+    };
+
+    const response = await axios(options);
+
+    if (response.data.success) {
+      // Payment is successful, update the order status in the database
+      await Donation.findOneAndUpdate(
+        { transactionId: merchantTransactionId }, // Use transactionId, not merchantTransactionId
+        {
+          $set: {
+            "paymentDetails.paymentStatus": "PAID",
+            donationOrderStatus: "CONFIRMED",
+          },
         },
-      };
-  
-      const response = await axios(options);
-  
-      if (response.data.success) {
-        // Payment is successful, update the order status in the database
-        await Order.findOneAndUpdate(
-            { transactionId: merchantTransactionId }, // Use transactionId, not merchantTransactionId
-            {
-                $set: {
-                    "paymentDetails.paymentStatus": "PAID",
-                    orderStatus: "CONFIRMED",
-                },
-            },
-            { new: true } 
-        );
-        
-  
-        res.status(200).json({
-          success: true,
-          message: 'Payment successful',
-          amount: response.data.data.amount, // Adjust based on actual response structure
-        });
-      } else {
-        res.status(200).json({
-          success: false,
-          message: 'Payment failed',
-          reason: response.data.data.message, // Adjust based on actual response structure
-        });
-      }
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
+        { new: true }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Payment successful",
+        amount: response.data.data.amount, // Adjust based on actual response structure
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        message: "Payment failed",
+        reason: response.data.data.message, // Adjust based on actual response structure
+      });
     }
-  };
-  
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // this controller is for getting all orders
-exports.getOrders = async (req, res) => {
+exports.getOrders2 = async (req, res) => {
   try {
-    const orders = await Order.find();
+    const donations = await Donation.find();
+    const userIds = donations.map((donation) => donation.userId); // Extract userIds
 
-    // checking if orders are found
-    if (!orders) {
-      return res.status(500).json({ message: "Orders not found" });
+    // Fetch users whose userId matches any of the extracted IDs
+    const users = await User.find({ userId: { $in: userIds } });
+
+    // Convert users array into a Map for efficient lookup
+    const userMap = new Map(users.map((user) => [user.userId, user]));
+
+    // Attach user details to each donation
+    const donationsWithUser = donations.map((donation) => ({
+      ...donation.toObject(),
+      user: userMap.get(donation.userId) || null, // Attach user object or null
+    }));
+
+    // Check if donations exist
+    if (!donationsWithUser.length) {
+      return res.status(500).json({ message: "Donations not found" });
     }
 
-    // return response
-    return res.status(200).json({ data: orders });
+    // Return response
+    res.status(200).json(donationsWithUser);
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 // this controller is for getting single order
-exports.getSingleOrder = async (req, res) => {
-
+exports.getSingleOrder2 = async (req, res) => {
   try {
     const { transactionId } = req.params; // Corrected this line
-
 
     // Checking if transactionId is provided
     if (!transactionId) {
@@ -170,9 +179,7 @@ exports.getSingleOrder = async (req, res) => {
     }
 
     // Fetching the order
-    const order = await Order.findOne({ transactionId }).populate("orderItems.productId");
-
-    console.log(order)
+    const order = await Donation.findOne({ transactionId });
 
     // Checking if order is found
     if (!order) {
@@ -187,10 +194,8 @@ exports.getSingleOrder = async (req, res) => {
   }
 };
 
-
-
 // this controller is for deleting order
-exports.deleteOrder = async (req, res) => {
+exports.deleteOrder2 = async (req, res) => {
   try {
     const { orderId } = req.params;
 
@@ -215,7 +220,7 @@ exports.deleteOrder = async (req, res) => {
 };
 
 // this controller is for getting orders by specific user
-exports.orderBySpecificUser = async (req, res) => {
+exports.orderBySpecificUser2 = async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -240,7 +245,7 @@ exports.orderBySpecificUser = async (req, res) => {
 };
 
 // this controller is for updating status of order only admin can hit this route
-exports.updateOrderStatus = async (req, res) => {
+exports.updateOrderStatus2 = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;

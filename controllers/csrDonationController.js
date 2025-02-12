@@ -19,7 +19,6 @@ exports.createCSRDonation = async (req, res) => {
 
         // Upload image to Cloudinary
         const imageUrl = await uploadOnCloudinary(req.files.image[0].path);
-        logger.info(imageUrl);
 
         // Create the CSR donation
         const csrDonation = await Donate.create({

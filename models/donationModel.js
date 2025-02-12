@@ -5,24 +5,24 @@ const moment = require("moment-timezone");
 const product = require("./product");
 
 // Define the Order schema
-const orderSchema = new mongoose.Schema({
-  orderId: {
-    type: mongoose.Schema.Types.UUID, // UUID type
+const donationSchema = new mongoose.Schema({
+  donationId: {
+    type: String, // UUID type
     default: () => require("uuid").v4(), // Automatically generate UUID
     required: true,
     unique: true,
   },
   userId: {
-    type: mongoose.Schema.Types.UUID, 
-    required: true,
-    ref: "User", 
+  type: String, 
+  required: true,
+  ref: "User", 
   },
-  orderItems: [
+  donationItems: [
     {
-      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-      name: { type: String, required: true },
+      donationItemsId: { type: String, required: true },
+      title: { type: String, required: true },
       quantity: { type: Number, required: true },
-      price: { type: Number, required: true },
+      amount: { type: Number, required: true },
     },
   ],
   amount: {
@@ -57,7 +57,7 @@ const orderSchema = new mongoose.Schema({
       required: true,
     },
   },
-  orderStatus: {
+  donationOrderStatus: {
     type: String,
     enum: ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"], // Enum for status
     default: "PENDING", // Default status
@@ -74,7 +74,7 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Middleware to set the updatedAt field before saving
-orderSchema.pre("save", function (next) {
+donationSchema.pre("save", function (next) {
   // Update the updatedAt field to current time in IST
   this.updatedAt = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   if (!this.createdAt) {
@@ -85,4 +85,4 @@ orderSchema.pre("save", function (next) {
 });
 
 // Create and export the Order model
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = mongoose.model("Donation", donationSchema);

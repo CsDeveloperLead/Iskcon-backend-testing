@@ -19,7 +19,6 @@ const createProduct = async (req, res) => {
       try {
         const cloudinaryResponse = await uploadOnCloudinary(file.path);
         imageUrls.push(cloudinaryResponse.secure_url);
-        logger.info(`Uploaded image: ${cloudinaryResponse.secure_url}`);
       } catch (uploadError) {
         logger.error("Image upload failed:", uploadError.message);
         return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
@@ -65,8 +64,7 @@ const createProduct = async (req, res) => {
 // Get all products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({}, "productId name subDesc images price").lean(); //  lean is used for optimization
-    logger.info(`Fetched All Products`);
+    const products = await Product.find({}, "productId name subDesc description stock category images price").lean(); //  lean is used for optimization
     res.status(200).json({
       success: true,
       data: products,

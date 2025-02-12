@@ -8,7 +8,6 @@ exports.createOfflineClasses = async (req, res) => {
     try {
         const { title, description, timings, location, classesDays } = req.body;
 
-        logger.info(req.body)
 
         // validating the data 
         if (!title || !description || !req.files || !timings || !location || !classesDays || req.files?.length === 0) {
@@ -39,8 +38,6 @@ exports.createOfflineClasses = async (req, res) => {
             }
         )
         await classes.save()
-        logger.info(classes)
-        logger.info('classes')
 
         // checking if blog is created or not
         if (!classes) {
@@ -51,7 +48,6 @@ exports.createOfflineClasses = async (req, res) => {
         // return response
         return res.status(201).json({ message: "Classes created successfully" });
     } catch (error) {
-        logger.info(error)
         return res.status(500).json({ message: "Internal Server Error" })
     }
 }

@@ -70,8 +70,7 @@ exports.createDonation = async (req, res) => {
 
         // Save to database
         const response = await newDonation.save();
-        console.log("res in donation : ",response)
-
+        
         return res.status(201).json({
             message: "Donation created successfully.",
             donation: newDonation,

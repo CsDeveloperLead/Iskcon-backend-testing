@@ -36,6 +36,7 @@ const connectToMongoDB = async () => {
 
     // }
     require("./app");
+    logger.info("Db connected")
   } catch (err) {
     logger.error("Error connecting to Iskcon MongoDB:", err);
   }

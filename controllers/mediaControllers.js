@@ -7,16 +7,19 @@ exports.createMedias = async (req, res) => {
         const { title, type } = req.body;
 
         // validating the data 
-        if (!title || !type || !req.files?.image[0] || req.files.image.length === 0) {
+        if (!title || !type || !req.files || req.files.length === 0) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
         // Upload images to Cloudinary and get URLs
         const imageUrls = [];
-        for (let i = 0; i < req.files.image.length; i++) {
-            const image = req.files.image[i];
-            const cloudinaryResponse = await uploadOnCloudinary(image.path);
-            imageUrls.push(cloudinaryResponse.secure_url); // Store Cloudinary URL of the uploaded image
+        for (const file of req.files) {
+            try {
+                const cloudinaryResponse = await uploadOnCloudinary(file.path);
+                imageUrls.push(cloudinaryResponse.secure_url);
+            } catch (uploadError) {
+                return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+            }
         }
 
 

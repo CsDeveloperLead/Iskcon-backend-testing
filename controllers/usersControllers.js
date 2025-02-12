@@ -20,9 +20,13 @@ exports.signup = async (req, res) => {
     }
 
     // Check for existing user based on email or phone number
-    const existingUser = await User.findOne(email ? { email } : { phone_no });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    const existingUserByEmail = await User.findOne({email: email});
+    if (existingUserByEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    const existingUserByPhone = await User.findOne({ phone_no:phone_no });
+    if (existingUserByPhone) {
+      return res.status(400).json({ message: "Phone number already exists" });
     }
     const otp = generateOTP();
     // Create user

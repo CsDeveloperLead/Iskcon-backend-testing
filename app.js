@@ -11,7 +11,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
-
+const main = require("./routes/main.routes");
 const PORT = process.env.PORT || 8080;
 
 // const corsOptions = {
@@ -58,6 +58,7 @@ app.use((req, _, next) => {
 app.use(cookieParser());
 app.use(bodyParser.json());
 
+app.get("/", main);
 app.use("/api/isckcon", routes);
 // app.use((req, res, next) => {
 //     next(errorconfig.formatErrorObject(errorconfig_1.errorlist['error_404']['resource_notFound']));

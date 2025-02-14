@@ -68,16 +68,12 @@ exports.getMediaAsPerDate = async (req, res) => {
     try {
         const { date } = req.body; // Example: "Fri Feb 14 2025 17:47:02 GMT+0530 (India Standard Time)"
 
-        console.log(date)
-
         if (!date) {
             return res.status(400).json({ message: "Date is required" });
         }
 
         // Convert incoming date to the same format as stored in DB (DD-MM-YYYY)
         const formattedDate = moment(new Date(date)).format("DD-MM-YYYY");
-
-        console.log(formattedDate)
 
         // Fetch media where createdAt matches the formatted date
         const medias = await Media.find({
@@ -123,7 +119,6 @@ exports.deleteMedia = async (req, res) => {
     try {
         const { mediaId } = req.body
 
-        console.log(mediaId)
         // checking if media id is provided or not
         if (!mediaId) {
             return res.status(400).json({ message: "Media Id is required" });

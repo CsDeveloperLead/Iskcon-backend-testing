@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require("nodemailer");
+const { verifyAdminByToken } = require('../../../utils/cookieutil');
 require("dotenv").config();
 
-router.post("/",async (req, res) => {
+router.post("/", async (req, res) => {
     const { name, email, mobile, subject, message } = req.body;
   
     try {

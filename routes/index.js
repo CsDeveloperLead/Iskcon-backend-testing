@@ -19,9 +19,11 @@ const donationOrderRouter = require('./v1/admin/donationOrder.routes');
 // const iskconCore = require('../routes/v1/iskconCore');
 // const apiKeyCheck = require("../middlewares/apiKeyCheck");
 
+
 const router = express.Router();
 // router.use(apiKeyCheck);
 // router.use('/v1', iskconCore);
+
 // all admins routes
 router.use(bodyParser.json());
 router.use('/v1/secure', registerUser);
@@ -37,7 +39,7 @@ router.use('/v1/admin/offlineClasses', offlineClassesRouter);
 router.use('/v1/admin/product', productAdminRouter);
 router.use('/v1/admin/csrdonation', csrDonationRouter);
 router.use('/v1/admin/contact', contactRouter);
-router.use('/v1/admin/donationOrder', donationOrderRouter);//
+router.use('/v1/admin/donationOrder', donationOrderRouter);
 
 
 

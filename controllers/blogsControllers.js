@@ -5,6 +5,7 @@ const { uploadOnCloudinary } = require("../utils/cloudinary");
 exports.createBlogs = async (req, res) => {
     try {
         const { title, description } = req.body;
+        console.log("title || !description || !req.files || req.files.length ->", title , description, req.files, req.files.length)
 
         // validating the data 
         if (!title || !description || !req.files || req.files.length === 0) {

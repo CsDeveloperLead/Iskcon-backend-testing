@@ -69,8 +69,8 @@ exports.createDonation = async (req, res) => {
         });
 
         // Save to database
-        await newDonation.save();
-
+        const response = await newDonation.save();
+        
         return res.status(201).json({
             message: "Donation created successfully.",
             donation: newDonation,

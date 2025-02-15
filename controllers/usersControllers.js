@@ -2,6 +2,7 @@ const User = require("../models/users");
 const errorConfig = require("../middlewares/errorHandler");
 const { getEncodedCookie, getdecodeToken } = require("../utils/cookieutil");
 const bcrypt = require("bcrypt");
+const {errorHandler} = require("../middlewares/errorHandler")
 
 const { sendVerificationEmail } = require("../services/emailVerify");
 const { SchemaTypes } = require("mongoose");
@@ -96,7 +97,7 @@ Iskcon Ghaziabad`;
 
     return res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    return errorConfig(error, req, res);
+    return errorHandler(error, req, res);
   }
 };
 
@@ -147,7 +148,7 @@ exports.removeUser = async (req, res) => {
 
     return res.status(200).json({ message: "User removed successfully" });
   } catch (error) {
-    return errorConfig(error, req, res);
+    return errorHandler(error, req, res);
   }
 };
 
@@ -201,7 +202,7 @@ exports.login = async (req, res) => {
       token: token,
     });
   } catch (error) {
-    return errorConfig(error, req, res);
+    return errorHandler(error, req, res);
   }
 };
 

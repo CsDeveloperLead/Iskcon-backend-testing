@@ -35,6 +35,7 @@ const corsOptions = {
       "https://truwix-isckon-frontend.vercel.app",
       "https://iskcon-wavecity-dev-api.truwix.com",
       "https://iskconwavecity.com",
+      "https://www.iskconwavecity.com",
     ];
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true); // Allow the origin

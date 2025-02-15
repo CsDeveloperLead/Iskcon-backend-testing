@@ -1,6 +1,6 @@
 const errorconfig = require('../helpers/errorconfig');
 const logger = require('../utils/logger');
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
     // logger.error(`Error: ${err}`);
     if (err.status === 400) {
         res.status(err.status).send(errorconfig.formatErrorObject(errorconfig.errorlist['error_400']['invalid_params']));

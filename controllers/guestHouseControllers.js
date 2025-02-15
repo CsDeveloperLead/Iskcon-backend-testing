@@ -6,17 +6,17 @@ exports.createHouseGuest = async (req, res) => {
     try {
         const { title, description, bookingNo, whatsAppNo, email, reservationTime, guestHouseLink } = req.body;
 
-        if (!title || !description || !guestHouseLink || req.files.image.length === 0) {
-            return res.status(400).json({ message: "Title, description and guestHouseLink are required" });
+        if (!title || !description || !guestHouseLink || req.files.length === 0) {
+            throw "Title, description and guestHouseLink are required";
         }
 
         // Upload images to Cloudinary and get URLs
         const imageUrls = [];
-        for (let i = 0; i < req.files.image.length; i++) {
-            const image = req.files.image[i];
-            const cloudinaryResponse = await uploadOnCloudinary(image.path);
-            imageUrls.push(cloudinaryResponse.secure_url); // Store Cloudinary URL of the uploaded image
+        for (const file of req.files) {
+                const cloudinaryResponse = await uploadOnCloudinary(file.path);
+                imageUrls.push(cloudinaryResponse.secure_url);
         }
+
 
         const guestHouse = await Guest.create({
             title,
@@ -30,13 +30,14 @@ exports.createHouseGuest = async (req, res) => {
         });
 
         if (!guestHouse) {
-            return res.status(500).json({ message: "GuestHouse not created" });
+            throw "GuestHouse not created";
         }
 
         return res.status(201).json({ message: "GuestHouse created successfully" });
 
     } catch (error) {
-        return res.status(500).json({ message: "Internal Server Error" })
+        console.log(error)
+        return res.status(500).json({ message: error || "Internal Server Error" })
     }
 }
 

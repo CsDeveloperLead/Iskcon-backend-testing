@@ -11,7 +11,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
-
+const main = require("./routes/main.routes");
 const PORT = process.env.PORT || 8080;
 
 // const corsOptions = {
@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 8080;
 
 // Dynamic Origin handling
 
-//app.use(expressLogger);
+app.use(expressLogger);
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -46,28 +46,25 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// logger.info(express_request_id());
-// app.use(express_request_id());
-// app.use(request_context.middleware("apirequest"));
-// app.use((req, _, next) => {
-//   request_context.set("apirequest:requestid", req["id"]);
-//   request_context.set("apirequest:apikey", req.headers["x-api-key"]);
-//   request_context.set("apirequest:IskconUser", req.headers["x-userid"]);
-//   next();
-// });
+app.use(express_request_id());
+app.use(request_context.middleware("apirequest"));
+app.use((req, _, next) => {
+  request_context.set("apirequest:requestid", req["id"]);
+  request_context.set("apirequest:apikey", req.headers["x-api-key"]);
+  request_context.set("apirequest:IskconUser", req.headers["x-userid"]);
+  next();
+});
 
 app.use(cookieParser());
 app.use(bodyParser.json());
 
+app.get("/", main);
 app.use("/api/isckcon", routes);
 // app.use((req, res, next) => {
 //     next(errorconfig.formatErrorObject(errorconfig_1.errorlist['error_404']['resource_notFound']));
 // });
 // app.use(errorHandler);
 app.use(express.static("public"));
-app.get("/health", (req, res) => {
-  res.status(200).send("OK"); // Health check endpoint
-});
 
 process.on("uncaughtException", (err) => {
   logger.error(err);
@@ -75,14 +72,5 @@ process.on("uncaughtException", (err) => {
 
 app.listen(PORT, () => {
   logger.info(`server running on ${PORT}`);
-  setInterval(async () => {
-    try {
-      const response = await axios.get(
-        "https://iskcon-backend-testing-pcnv.onrender.com/health"
-      );
-    } catch (error) {
-      console.error("Health check failed:", error);
-    }
-  }, 5 * 60 * 1000);
 });
 exports.default = app;

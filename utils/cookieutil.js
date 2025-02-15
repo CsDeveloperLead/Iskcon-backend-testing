@@ -92,4 +92,49 @@ exports.getdecodeToken = (token) => {
     }
 };
 
+exports.verifyToken = (req, res, next) => {
+    //first check request headers has authorization or not
+    const authorization = req.headers.authorization
+    if(!authorization) return res.status(401).json({ error : 'Token not found'})
 
+    //Extract the jwt token fro the request header
+    const token = req.headers.authorization.split(' ')[1];
+    if(!token) return res.status(403).json({error: 'Unauthorised'});
+
+    try {
+        // verify the JWT token
+        const decoded = jwt.verify(token, jwtSecretKey[0]);
+
+        //Attach user information to the request object
+        req.user = JSON.parse(decrypt(decoded.info))
+        next();
+    } catch (error) {
+        logger.error('Token decoding failed:', error);
+        return res.status(403).json({ error : 'Unauthorised Request'})
+    }
+}
+
+exports.verifyAdminByToken = (req, res, next) => {
+    //first check request headers has authorization or not
+    const authorization = req.headers.authorization
+    if(!authorization) return res.status(401).json({ error : 'Token not found'})
+
+    //Extract the jwt token fro the request header
+    const token = req.headers.authorization.split(' ')[1];
+    if(!token) return res.status(403).json({error: 'Unauthorised'});
+
+    try {
+        // verify the JWT token
+        const decoded = jwt.verify(token, jwtSecretKey[0]);
+
+        //Attach user information to the request object
+        req.user = JSON.parse(decrypt(decoded.info));
+        if(req.user.role != 'iskcon-admin') {
+            return res.status(403).json({error: "Access denied: Only admins are allowed to do this action"})
+        }
+        next();
+    } catch (error) {
+        logger.error('Token decoding failed:', error);
+        return res.status(403).json({ error : 'Unauthorised Request'})
+    }
+}

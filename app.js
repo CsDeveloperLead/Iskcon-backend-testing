@@ -65,9 +65,6 @@ app.use("/api/isckcon", routes);
 // });
 // app.use(errorHandler);
 app.use(express.static("public"));
-app.get("/health", (req, res) => {
-  res.status(200).send("OK"); // Health check endpoint
-});
 
 process.on("uncaughtException", (err) => {
   logger.error(err);
@@ -75,14 +72,5 @@ process.on("uncaughtException", (err) => {
 
 app.listen(PORT, () => {
   logger.info(`server running on ${PORT}`);
-  setInterval(async () => {
-    try {
-      const response = await axios.get(
-        "https://iskcon-backend-testing-pcnv.onrender.com/health"
-      );
-    } catch (error) {
-      console.error("Health check failed:", error);
-    }
-  }, 5 * 60 * 1000);
 });
 exports.default = app;

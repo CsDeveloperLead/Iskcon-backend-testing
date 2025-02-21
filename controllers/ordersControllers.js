@@ -1,144 +1,59 @@
 const Order = require("../models/order");
 const crypto = require("crypto");
-const axios = require("axios");
+const { processPayment } = require("../utils/razorpayUtil");
 require("dotenv").config();
-let merchantId = process.env.MERCHANT_ID1;
-let salt_key = process.env.SALT_KEY1;
 
 
 exports.createOrder = async (req, res) => {
 
-  const {
-    userId,
-    amount,
-    shippingAddress,
-    paymentDetails, // Default to empty if missing
-    orderStatus,
-    orderItems,
-    contact,
-    transactionId,
-  } = req.body;
-
-  // Prepare order data
-  const orderData = {
-    merchantId: merchantId,
-    userId,
-    amount : amount * 100,
-    shippingAddress,
-    paymentDetails,
-    orderStatus,
-    orderItems,
-    contact,
-    transactionId,
-    redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
-    callbackUrl: `http://localhost:5173`,
-    redirectMode: "REDIRECT",
-    paymentInstrument: {
-      type: "PAY_PAGE",
-    },
-    merchantTransactionId: transactionId,
-
-  };
-
-
   try {
-    // Save order to the database
-    const newOrder = new Order(orderData);
-    await newOrder.save();
+    const {
+      amount,
+    } = req.body;
 
-    // Prepare payload for the payment request
-    const keyIndex = 1;
-    const payload = JSON.stringify(orderData);
-    const payloadMain = Buffer.from(payload).toString("base64");
-
-    const string = payloadMain + "/pg/v1/pay" + salt_key;
-    const sha256 = crypto.createHash("sha256").update(string).digest("hex");
-    const checksum = sha256 + "###" + keyIndex;
-
-    const prod_URL = process.env.PHONEPAY_API1;
-
-    const options = {
-      method: "POST",
-      url: prod_URL,
-      headers: {
-        accept: "application/json",
-        "Content-Type": "application/json",
-        "X-VERIFY": checksum,
-      },
-      data: {
-        request: payloadMain,
-      },
-    };
-
-    
-    // Send payment request
-    await axios(options)
-      .then((response) => {
-        res.json(response.data); // Send payment response to the frontend
-      })
-      .catch((error) => {
-        res.status(500).send("Payment request failed");
-      });
+    await processPayment(amount,res)
   } catch (error) {
-    res.status(500).send("Failed to create order");
+    return res.status(500).json({ message: "Failed to create order", error: error })
   }
 };
 
 exports.status = async (req, res) => {
-    const { id: merchantTransactionId } = req.query; // Extract transaction ID from query
-    const keyIndex = 1;
-  
-    try {
-      // Construct the string for generating checksum
-      const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + salt_key;
-      const sha256 = crypto.createHash('sha256').update(string).digest('hex');
-      const checksum = sha256 + '###' + keyIndex;
-  
-      // Call the PhonePe status API
-      const options = {
-        method: 'GET',
-        url: process.env.STATUS_API1 + `/pg/v1/status/${merchantId}/${merchantTransactionId}`,
-        headers: {
-          accept: 'application/json',
-          'Content-Type': 'application/json',
-          'X-VERIFY': checksum,
-          'X-MERCHANT-ID': merchantId,
-        },
-      };
-  
-      const response = await axios(options);
-  
-      if (response.data.success) {
-        // Payment is successful, update the order status in the database
-        await Order.findOneAndUpdate(
-            { transactionId: merchantTransactionId }, // Use transactionId, not merchantTransactionId
-            {
-                $set: {
-                    "paymentDetails.paymentStatus": "PAID",
-                    orderStatus: "CONFIRMED",
-                },
-            },
-            { new: true } 
-        );
-        
-  
-        res.status(200).json({
-          success: true,
-          message: 'Payment successful',
-          amount: response.data.data.amount, // Adjust based on actual response structure
-        });
-      } else {
-        res.status(200).json({
-          success: false,
-          message: 'Payment failed',
-          reason: response.data.data.message, // Adjust based on actual response structure
-        });
-      }
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
+
+  const { orderId, paymentId, signature, userId,
+    amount,
+    shippingAddress,
+
+    orderItems,
+    contact,
+  } = req.body
+
+
+  const secretKey = process.env.RAZORPAY_KEY_SECRET
+
+  const hmac = crypto.createHmac("sha256", secretKey)
+
+  hmac.update(orderId + "|" + paymentId)
+
+  const generatedSignature = hmac.digest("hex")
+
+  if (generatedSignature === signature) {
+    const data = {
+      userId,
+      amount,
+      shippingAddress,
+      paymentStatus: "PAID", // Default to empty if missing
+      orderStatus: "CONFIRMED",
+      orderItems,
+      contact,
     }
-  };
-  
+    const order = new Order(data)
+    await order.save()
+    return res.status(200).json({message: "Payment Verified successfully", response: order})
+  } else {
+    throw new ApiError(401, "Payment not verified")
+  }
+};
+
 
 // this controller is for getting all orders
 exports.getOrders = async (req, res) => {

@@ -11,7 +11,7 @@ exports.createOrder = async (req, res) => {
       amount,
     } = req.body;
 
-    await processPayment(amount)
+    await processPayment(amount,res)
   } catch (error) {
     return res.status(500).json({ message: "Failed to create order", error: error })
   }

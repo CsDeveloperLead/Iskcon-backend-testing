@@ -62,13 +62,12 @@ exports.createStory = async (req, res) => {
 
 exports.getAllStory = async (req, res) => {
     try {
-        const story = await DailyStory.find().lean()
-
-        return res.status(200).json({ story })
-
-    } catch (error) {
-        console.log("Error getting All Story", error);
-    }
+        const stories = await DailyStory.find().lean();
+        return res.status(200).json({ story: stories }); // Ensure consistency in key name
+      } catch (error) {
+        console.error("Error getting All Story", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
 }
 
 exports.getStoryByDate = async (req, res) => {

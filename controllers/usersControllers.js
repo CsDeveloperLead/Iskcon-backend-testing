@@ -2,7 +2,6 @@ const User = require("../models/users");
 const errorConfig = require("../middlewares/errorHandler");
 const { getEncodedCookie, getdecodeToken } = require("../utils/cookieutil");
 const bcrypt = require("bcrypt");
-const {errorHandler} = require("../middlewares/errorHandler")
 
 const { sendVerificationEmail } = require("../services/emailVerify");
 const { SchemaTypes } = require("mongoose");
@@ -21,13 +20,9 @@ exports.signup = async (req, res) => {
     }
 
     // Check for existing user based on email or phone number
-    const existingUserByEmail = await User.findOne({email: email});
-    if (existingUserByEmail) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
-    const existingUserByPhone = await User.findOne({ phone_no:phone_no });
-    if (existingUserByPhone) {
-      return res.status(400).json({ message: "Phone number already exists" });
+    const existingUser = await User.findOne(email ? { email } : { phone_no });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
     }
     const otp = generateOTP();
     // Create user
@@ -97,7 +92,7 @@ Iskcon Ghaziabad`;
 
     return res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    return errorHandler(error, req, res);
+    return errorConfig(error, req, res);
   }
 };
 
@@ -148,7 +143,7 @@ exports.removeUser = async (req, res) => {
 
     return res.status(200).json({ message: "User removed successfully" });
   } catch (error) {
-    return errorHandler(error, req, res);
+    return errorConfig(error, req, res);
   }
 };
 
@@ -202,7 +197,7 @@ exports.login = async (req, res) => {
       token: token,
     });
   } catch (error) {
-    return errorHandler(error, req, res);
+    return errorConfig(error, req, res);
   }
 };
 

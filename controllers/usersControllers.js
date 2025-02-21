@@ -2,12 +2,14 @@ const User = require("../models/users");
 const errorConfig = require("../middlewares/errorHandler");
 const { getEncodedCookie, getdecodeToken } = require("../utils/cookieutil");
 const bcrypt = require("bcrypt");
+const { errorHandler } = require("../middlewares/errorHandler")
 
 const { sendVerificationEmail } = require("../services/emailVerify");
 const { SchemaTypes } = require("mongoose");
+const twilio = require("twilio");
 
 const generateOTP = () => {
-  return Math.floor(1000 + Math.random() * 9000).toString();
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 exports.signup = async (req, res) => {
@@ -20,14 +22,21 @@ exports.signup = async (req, res) => {
     }
 
     // Check for existing user based on email or phone number
-    const existingUser = await User.findOne(email ? { email } : { phone_no });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    const existingUserByEmail = await User.findOne({ email: email });
+    if (existingUserByEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    const existingUserByPhone = await User.findOne({ phone_no: phone_no });
+    if (existingUserByPhone) {
+      return res.status(400).json({ message: "Phone number already exists" });
     }
     const otp = generateOTP();
     // Create user
-    const userData = { name, password, user_role, otp };
-    if (email) userData.email = email;
+    const userData = { name, password, user_role };
+    if (email) {
+      userData.email = email
+      userData.otp = otp
+    }
     if (phone_no) userData.phone_no = phone_no;
 
     const user = await User.create(userData);
@@ -129,10 +138,6 @@ exports.removeUser = async (req, res) => {
   try {
     const { email, phone_no } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
-    }
-
     const user = await User.findOneAndDelete({
       $or: [{ email }, { phone_no }],
     });
@@ -213,7 +218,7 @@ exports.getUserDataDecoded = async (req, res) => {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
 
-    const user = await User.findOne({userId:decodedData.id}).select("-password");
+    const user = await User.findOne({ userId: decodedData.id }).select("-password");
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -224,3 +229,78 @@ exports.getUserDataDecoded = async (req, res) => {
   }
 };
 
+// exports.otpsender = async (req, res) => {
+
+//   const { mobileNumber } = req.body;
+
+//   let number = mobileNumber.slice(2)
+
+//   // Twilio configuration
+//   const accountSid = process.env.TWILIO_ACCOUNT_SID;
+//   const authToken = process.env.TWILIO_AUTH_TOKEN;
+//   const serviceSid = process.env.TWILIO_AUTH_SERVICES;
+
+//   const client = twilio(accountSid, authToken);
+
+//   try {
+//     const verification = await client.verify.v2.services(serviceSid).verifications.create({
+//       to: `+91${number}`, // Recipient's phone number in E.164 format
+//       channel: "sms", // Use "sms" for SMS or "whatsapp" for WhatsApp
+//     });
+
+
+//     return res.status(200).json({
+//       message: "OTP sent successfully via SMS",
+//       success: true,
+//       sid: verification.sid,
+//     });
+//   } catch (error) {
+//     logger.error("Error sending OTP via SMS:", error.message);
+//     return res.status(500).json({ message: "Error in Sending OTP", error: error.message });
+//   }
+// };
+
+
+// exports.verifyOTP = async (req, res) => {
+//   const { mobileNumber, code } = req.body;
+
+//   let number = mobileNumber.slice(2)
+
+//   const gotUser = await User.findOne({ phone_no: mobileNumber }).select("-password")
+
+//   if (!gotUser) {
+//     return res.status(404).json({
+//       success: false,
+//       error: "User not found.",
+//     });
+//   }
+
+//   const accountSid = process.env.TWILIO_ACCOUNT_SID;
+//   const authToken = process.env.TWILIO_AUTH_TOKEN;
+//   const serviceSid = process.env.TWILIO_AUTH_SERVICES;
+
+//   const client = twilio(accountSid, authToken);
+
+//   try {
+//     const verificationCheck = await client.verify.v2.services(serviceSid).verificationChecks.create({
+//       to: `+91${number}`,
+//       code: code,
+//     });
+
+//     if (verificationCheck.status === "approved") {
+//       return res.status(200).json({
+//         success: true,
+//         gotUser,
+//         message: "OTP verified successfully",
+//       });
+//     } else {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid OTP",
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error verifying OTP:", error.message);
+//     return res.status(500).json({ message: "Error verifying OTP", error: error.message });
+//   }
+// };

@@ -18,6 +18,7 @@ const contactRouter = require('./v1/admin/contact.routes');
 const donationOrderRouter = require('./v1/admin/donationOrder.routes');
 const liveDarshanRouter = require('./v1/admin/liveDarshan.routes');
 const dailyStoryRouter = require('./v1/admin/dailyStory.routes');
+const guestDonationRouter = require('./v1/admin/guestDonation.routes');
 // const iskconCore = require('../routes/v1/iskconCore');
 // const apiKeyCheck = require("../middlewares/apiKeyCheck");
 
@@ -41,6 +42,8 @@ router.use('/v1/admin/csrdonation', csrDonationRouter);
 router.use('/v1/admin/contact', contactRouter);
 router.use('/v1/admin/donationOrder', donationOrderRouter);
 router.use('/v1/admin/liveDarshan', liveDarshanRouter);
+router.use('/v1/admin/guestDonation', guestDonationRouter);
+
 // router.use('/v1/admin/daily-story', dailyStoryRouter);
 
 

@@ -22,7 +22,6 @@ exports.status = async (req, res) => {
   const { orderId, paymentId, signature, userId,
     amount,
     shippingAddress,
-
     orderItems,
     contact,
   } = req.body
@@ -48,9 +47,9 @@ exports.status = async (req, res) => {
     }
     const order = new Order(data)
     await order.save()
-    return res.status(200).json({message: "Payment Verified successfully", response: order})
+    return res.status(200).json({ message: "Payment Verified successfully", response: order })
   } else {
-    throw new ApiError(401, "Payment not verified")
+    return res.status(500).json({ message: "Failed to verify order", error: error })
   }
 };
 

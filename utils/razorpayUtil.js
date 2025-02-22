@@ -3,7 +3,7 @@ const { razorpayInstance } = require("../controllers/razorpayConfig");
 const razorpayInstanceValue = razorpayInstance();
 
 
-exports.processPayment = async (amount) => {
+exports.processPayment = async (amount, res) => {
     const option = {
         amount: amount * 100,
         currency: "INR",

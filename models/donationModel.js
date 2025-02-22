@@ -13,9 +13,9 @@ const donationSchema = new mongoose.Schema({
     unique: true,
   },
   userId: {
-  type: String, 
-  required: true,
-  ref: "User", 
+    type: String,
+    required: true,
+    ref: "User",
   },
   donationItems: [
     {
@@ -37,26 +37,13 @@ const donationSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  merchantId: {
+  paymentStatus: {
     type: String,
+    enum: ["PENDING", "PAID"], // Enum for payment status
+    default: "PENDING", // Default payment status
     required: true,
   },
-  transactionId: {
-    type: String,
-    required: true,
-  },
-  paymentDetails: {
-    paymentStatus: {
-      type: String,
-      enum: ["PENDING", "PAID"], // Enum for payment status
-      default: "PENDING", // Default payment status
-      required: true,
-    },
-    paymentId: {
-      type: String, // Payment ID (e.g., Stripe payment ID)
-      required: true,
-    },
-  },
+
   donationOrderStatus: {
     type: String,
     enum: ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"], // Enum for status

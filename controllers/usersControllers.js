@@ -2,11 +2,11 @@ const User = require("../models/users");
 const errorConfig = require("../middlewares/errorHandler");
 const { getEncodedCookie, getdecodeToken } = require("../utils/cookieutil");
 const bcrypt = require("bcrypt");
-const { errorHandler } = require("../middlewares/errorHandler")
+const {errorHandler} = require("../middlewares/errorHandler")
 
 const { sendVerificationEmail } = require("../services/emailVerify");
 const { SchemaTypes } = require("mongoose");
-const twilio = require("twilio");
+// const twilio = require("twilio");
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();

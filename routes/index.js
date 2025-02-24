@@ -45,6 +45,7 @@ router.use('/v1/admin/liveDarshan', liveDarshanRouter);
 router.use('/v1/admin/guestDonation', guestDonationRouter);
 
 // router.use('/v1/admin/daily-story', dailyStoryRouter);
+router.use('/v1/admin/daily-story', dailyStoryRouter);
 
 
 

@@ -5,16 +5,17 @@ const { uploadOnCloudinary } = require("../utils/cloudinary");
 
 exports.createStory = async (req, res) => {
     try {
-        const { titles, descriptions } = req.body;
+        const { titles, descriptions ,types } = req.body;
         const files = req.files;
 
         // Validate input
-        if (!titles || !descriptions || files.length === 0) {
+        if (!titles || !descriptions || !types || files.length === 0) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
         const titleArray = Array.isArray(titles) ? titles : [titles];
         const descriptionArray = Array.isArray(descriptions) ? descriptions : [descriptions];
+        const typeArray = Array.isArray(types) ? types : [types];
 
         // Ensure all fields have the correct length
         if (titleArray.length !== descriptionArray.length || titleArray.length !== files.length) {
@@ -25,15 +26,17 @@ exports.createStory = async (req, res) => {
         const uploadPromises = files.map((file, index) => {
             const title = titleArray[index];
             const description = descriptionArray[index];
+            const type = typeArray[index];
 
-            if (!title || !description) {
+            if (!title || !description || !type) {
                 throw new Error(`Missing title or description for story ${index + 1}`);
             }
 
             return uploadOnCloudinary(file.path).then((cloudinaryResponse) => ({
                 title,
                 description,
-                Image: cloudinaryResponse?.secure_url,
+                type,
+                media: cloudinaryResponse?.secure_url,
             }));
         });
 
@@ -41,7 +44,7 @@ exports.createStory = async (req, res) => {
         const stories = await Promise.all(uploadPromises);
 
         // Check for failed uploads
-        const invalidStories = stories.filter((story) => !story.Image);
+        const invalidStories = stories.filter((story) => !story.media);
         if (invalidStories.length > 0) {
             return res.status(500).json({ message: 'One or more images failed to upload' });
         }

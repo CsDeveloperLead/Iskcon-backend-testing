@@ -7,7 +7,13 @@ const dailyStorySchema = new mongoose.Schema(
             {
                 title: { type: String },
                 description: { type: String },
-                Image: { type: String }
+                type:   
+                {
+                    type: String,
+                    enum: ["image", "video"],
+                    default: "image",
+                },
+                media: { type: String }
             }
         ],
         createdAt: {

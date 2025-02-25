@@ -1,6 +1,6 @@
 {
   "name": "iskcon-backend-api",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Iskcon Ghaziabad",
   "main": "app.js",
   "scripts": {

@@ -2,62 +2,40 @@ const DailyStory = require("../models/dailyStory");
 const moment = require("moment-timezone");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 
-
 exports.createStory = async (req, res) => {
     try {
-        const { titles, descriptions ,types } = req.body;
-        const files = req.files;
+        const { title, description, type } = req.body;
 
+        console.log(req.files);
+        console.log(req.files[0]);
+        console.log(req.files[0].path);
         // Validate input
-        if (!titles || !descriptions || !types || files.length === 0) {
+        if (!title || !description || !type || !req.files || !req.files[0]) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
-        const titleArray = Array.isArray(titles) ? titles : [titles];
-        const descriptionArray = Array.isArray(descriptions) ? descriptions : [descriptions];
-        const typeArray = Array.isArray(types) ? types : [types];
-
-        // Ensure all fields have the correct length
-        if (titleArray.length !== descriptionArray.length || titleArray.length !== files.length) {
-            return res.status(400).json({ message: 'Mismatch between titles, descriptions, and files' });
+        // Upload media to Cloudinary
+        const cloudinaryResponse = await uploadOnCloudinary(req.files[0].path);
+        if (!cloudinaryResponse?.secure_url) {
+            return res.status(500).json({ message: 'Image upload failed' });
         }
 
-        // Prepare stories
-        const uploadPromises = files.map((file, index) => {
-            const title = titleArray[index];
-            const description = descriptionArray[index];
-            const type = typeArray[index];
-
-            if (!title || !description || !type) {
-                throw new Error(`Missing title or description for story ${index + 1}`);
-            }
-
-            return uploadOnCloudinary(file.path).then((cloudinaryResponse) => ({
-                title,
-                description,
-                type,
-                media: cloudinaryResponse?.secure_url,
-            }));
+        // Create and save story
+        const newStory = new DailyStory({
+            title,
+            description,
+            type,
+            media: cloudinaryResponse.secure_url,
         });
 
-        // Wait for all uploads to finish
-        const stories = await Promise.all(uploadPromises);
-
-        // Check for failed uploads
-        const invalidStories = stories.filter((story) => !story.media);
-        if (invalidStories.length > 0) {
-            return res.status(500).json({ message: 'One or more images failed to upload' });
-        }
-
-        // Save stories to database
-        const newDailyStory = await DailyStory.create({ story: stories });
+        await newStory.save();
 
         res.status(201).json({
-            message: 'Daily stories created successfully!',
-            data: newDailyStory,
+            message: 'Daily story created successfully!',
+            data: newStory,
         });
     } catch (error) {
-        console.error('Error creating daily stories:', error);
+        console.error('Error creating daily story:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
@@ -121,3 +99,40 @@ exports.deleteStory = async (req, res) => {
         console.log("Error while deleting Story", error);
     }
 }
+
+exports.updateStory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, type } = req.body;
+        let media;
+
+        const existingStory = await DailyStory.findById(id);
+        if (!existingStory) {
+            return res.status(404).json({ message: 'Story not found' });
+        }
+
+        if (req.files && req.files[0]) {
+            const cloudinaryResponse = await uploadOnCloudinary(req.files[0].path);
+            if (!cloudinaryResponse?.secure_url) {
+                return res.status(500).json({ message: 'Image upload failed' });
+            }
+            media = cloudinaryResponse.secure_url;
+        }
+
+        existingStory.title = title || existingStory.title;
+        existingStory.description = description || existingStory.description;
+        existingStory.type = type || existingStory.type;
+        existingStory.media = media || existingStory.media;
+        existingStory.updatedAt = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
+
+        await existingStory.save();
+
+        res.status(200).json({
+            message: 'Daily story updated successfully!',
+            data: existingStory,
+        });
+    } catch (error) {
+        console.error('Error updating daily story:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};

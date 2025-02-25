@@ -51,7 +51,7 @@ const loggerInstance = pino(
   logDestination
 );
 
-// ✅ Separate Functions for Logging (Including `trace` and `fatal`)
+// Separate Functions for Logging (Including `trace` and `fatal`)
 const logger = {
   trace: function (...args) {
     const [message, data] = args;

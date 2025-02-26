@@ -10,19 +10,8 @@ exports.createOfflineClasses = async (req, res) => {
 
 
         // validating the data 
-        if (!title || !description || !req.files || !timings || !location || !classesDays || req.files?.length === 0) {
+        if (!title || !description  || !timings || !location || !classesDays) {
             return res.status(400).json({ message: "All fields are required" });
-        }
-
-        // Upload images to Cloudinary and get URLs
-        const imageUrls = [];
-        for (const file of req.files) {
-            try {
-                const cloudinaryResponse = await uploadOnCloudinary(file.path);
-                imageUrls.push(cloudinaryResponse.secure_url);
-            } catch (uploadError) {
-                return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
-            }
         }
 
         
@@ -95,7 +84,9 @@ exports.getSingleClass = async (req, res) => {
 // this controller is for deleting a Class
 exports.deleteClass = async (req, res) => {
     try {
-        const { classId } = req.body
+        const { classId } = req.params;
+
+        console.log(classId);
 
         // checking if Class id is provided or not
         if (!classId) {
@@ -138,22 +129,7 @@ exports.editClass = async (req, res) => {
         if (classesDays) updated.classesDays = classesDays;
 
         // Handle image update if new images are uploaded
-        if (req.files?.image) {
-            const newImages = [];
-
-            // Loop through the uploaded images
-            for (let i = 0; i < req.files.image.length; i++) {
-                const image = req.files.image[i];
-
-                // Upload each image to Cloudinary
-                const cloudinaryResponse = await uploadOnCloudinary(image.path);
-                newImages.push(cloudinaryResponse.secure_url); // Store the Cloudinary URL for each image
-            }
-
-            // Update the images field with new images (replace the old ones)
-            updated.image = newImages; // Assuming you want to replace all images
-        }
-
+       
         // Update the Class in the database
         const updatedClass = await OfflineClasses.findByIdAndUpdate(classId, updated, { new: true, lean: true });
 

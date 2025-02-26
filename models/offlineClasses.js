@@ -11,10 +11,6 @@ const offlineClassesSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        // image: [{
-        //     type: String,
-        //     required: true
-        // }],
         timings:{
             type: String,
             required: true

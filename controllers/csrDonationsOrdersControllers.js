@@ -47,6 +47,7 @@ exports.status = async (req, res) => {
             name,
             email,
             contact,
+            paymentStatus: "PAID"
         }
 
         await Donate.findOneAndUpdate(
@@ -62,3 +63,12 @@ exports.status = async (req, res) => {
         return res.status(500).json({ message: "Failed to verify order", error: error })
     }
 };
+
+exports.getAllOrders = async (req, res) => {
+    try {
+        const allOrders = await CSRDonateOrder.find()
+        return res.status(200).json({ message: "All orders", response: allOrders })
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to get all orders", error: error })
+    }
+}

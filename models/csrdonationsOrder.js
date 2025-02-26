@@ -19,6 +19,11 @@ const donateOrderSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        paymentStatus: {
+            type: String,
+            enum: ["PENDING", "PAID"], // Enum for payment status
+            default: "PENDING", // Default payment status
+        },
         csdDonationType:{
             type: mongoose.Schema.Types.ObjectId,
             ref: "CSRDonate",

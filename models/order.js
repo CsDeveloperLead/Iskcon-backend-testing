@@ -7,15 +7,14 @@ const product = require("./product");
 // Define the Order schema
 const orderSchema = new mongoose.Schema({
   orderId: {
-    type: mongoose.Schema.Types.UUID, // UUID type
+    type: String, // UUID type
     default: () => require("uuid").v4(), // Automatically generate UUID
     required: true,
     unique: true,
   },
   userId: {
-    type: mongoose.Schema.Types.UUID,
+    type: String,
     required: true,
-    ref: "User",
   },
   orderItems: [
     {

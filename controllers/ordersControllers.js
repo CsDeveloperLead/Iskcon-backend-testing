@@ -1,6 +1,7 @@
 const Order = require("../models/order");
 const crypto = require("crypto");
 const { processPayment } = require("../utils/razorpayUtil");
+const User = require("../models/users");
 require("dotenv").config();
 
 
@@ -58,18 +59,34 @@ exports.status = async (req, res) => {
 exports.getOrders = async (req, res) => {
   try {
     const orders = await Order.find();
-
-    // checking if orders are found
-    if (!orders) {
-      return res.status(500).json({ message: "Orders not found" });
+    
+    if (!orders.length) {
+      return res.status(404).json({ message: "Orders not found" });
     }
 
-    // return response
-    return res.status(200).json({ data: orders });
+    // Extract userIds from orders
+    const userIds = orders.map((order) => order.userId);
+
+    // Fetch users whose userId matches any in the extracted userIds
+    const users = await User.find({ userId: { $in: userIds } });
+
+    // Convert users array into a Map for efficient lookup
+    const userMap = new Map(users.map((user) => [user.userId, user]));
+
+    // Attach user details to each order
+    const ordersWithUser = orders.map((order) => ({
+      ...order.toObject(),
+      user: userMap.get(order.userId) || null, // Attach user object or null
+    }));
+
+    // Return response
+    return res.status(200).json(ordersWithUser);
   } catch (error) {
+    console.error("Error fetching orders:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // this controller is for getting single order
 exports.getSingleOrder = async (req, res) => {

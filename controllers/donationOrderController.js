@@ -142,26 +142,31 @@ exports.deleteOrder2 = async (req, res) => {
 exports.orderBySpecificUser2 = async (req, res) => {
   try {
     const { userId } = req.params;
+    console.log("User ID:", userId);
 
-    // checking if userId is provided
+    // Checking if userId is provided
     if (!userId) {
       return res.status(400).json({ message: "User Id is required" });
     }
 
-    // getting orders
-    const orders = await Order.find({ userId });
+    // Getting orders
+    const orders = await Donation.find({ userId });
 
-    // checking if orders are found
-    if (!orders) {
-      return res.status(500).json({ message: "Orders not found" });
+    console.log("Orders:", orders);
+
+    // Checking if orders exist
+    if (orders.length === 0) {
+      return res.status(404).json({ message: "No orders found for this user" });
     }
 
-    // return response
+    // Return response
     return res.status(200).json({ data: orders });
   } catch (error) {
+    console.error("Error fetching orders:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // this controller is for updating status of order only admin can hit this route
 exports.updateOrderStatus2 = async (req, res) => {

@@ -22,6 +22,7 @@ const guestDonationRouter = require('./v1/admin/guestDonation.routes');
 const csrDonationOrderRouter = require('./v1/admin/csrdonationsOrder.routes');
 // const iskconCore = require('../routes/v1/iskconCore');
 // const apiKeyCheck = require("../middlewares/apiKeyCheck");
+const profileRouter = require('./v1/admin/profile.routes');
 
 const router = express.Router();
 // router.use(apiKeyCheck);
@@ -47,6 +48,7 @@ router.use('/v1/admin/guestDonation', guestDonationRouter);
 router.use('/v1/admin/csdonation/orders', csrDonationOrderRouter);
 // router.use('/v1/admin/daily-story', dailyStoryRouter);
 router.use('/v1/admin/daily-story', dailyStoryRouter);
+router.use('/v1/admin/profile', profileRouter);
 
 
 

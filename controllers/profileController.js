@@ -1,5 +1,3 @@
-
-
 const moment = require("moment-timezone");
 const Profile = require("../models/Profile");
 
@@ -7,7 +5,8 @@ exports.createOrUpdateProfile = async (req, res) => {
   console.log("Request body:", req.body);
 
   try {
-    const { personalDetails, address, relationships, occasions, idProof } = req.body;
+    const { personalDetails, address, relationships, occasions, idProof } =
+      req.body;
 
     // Validate required fields
     if (
@@ -80,7 +79,9 @@ exports.createOrUpdateProfile = async (req, res) => {
     // Find and update profile
     const profile = await Profile.findOneAndUpdate(query, update, options);
 
-    res.status(200).json({ message: "Profile saved/updated successfully", profile });
+    res
+      .status(200)
+      .json({ message: "Profile saved/updated successfully", profile });
   } catch (error) {
     console.error("Error saving/updating profile:", error);
     res.status(500).json({ message: "Internal server error" });

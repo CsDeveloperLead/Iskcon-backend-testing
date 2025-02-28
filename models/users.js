@@ -6,7 +6,15 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, unique: true, sparse: true ,lowercase:true},
     phone_no: { type: String, unique: true, sparse: true },
-    password: { type: String, required: true },
+    password: {
+        type: String,
+        required: function () {
+            return !this.googleId ;// Password is required only if no social login IDs are present
+        },
+        trim: true,
+        min: 6
+    },
+    googleId: { type: String },
     user_role: { type: String, required: true, default: "iskcon-user" },
     otp: { type: Number },
     isEmailVerified: { type: Boolean, default: false },
@@ -31,9 +39,9 @@ const userSchema = new mongoose.Schema({
 // Middleware for hashing the password before saving
 userSchema.pre("save", async function (next) {
     try {
-        if (this.isModified("password")) {
+        if (this.isModified('password') && !this.password.startsWith('$2b$')) {
             this.password = await bcrypt.hash(this.password, 10);
-        }
+          }
         this.updatedAt = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
 
         if (this.isNew) {

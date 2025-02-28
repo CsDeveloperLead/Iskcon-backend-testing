@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, login, verifyOtp, removeUser, getUserDataDecoded, otpsender, verifyOTP } = require('../../../controllers/usersControllers');
+const { signup, login, verifyOtp, removeUser, getUserDataDecoded, otpsender, verifyOTP, sendOTPbyEmail,resetPassword ,GoogleLogin} = require('../../../controllers/usersControllers');
 const { verifyHMAC } = require('../../../middlewares/auth');
 const { signUpValidation } = require('../../../middlewares/usersHandler');
 const router = express.Router();
@@ -10,6 +10,9 @@ router.post('/login', login);
 router.post('/verify-otp', verifyOtp);
 router.delete('/user-delete', removeUser);
 router.get('/decode', getUserDataDecoded);
+router.post('/send-otp', sendOTPbyEmail);
+router.post('/reset-password', resetPassword);
+router.post('/google-auth', GoogleLogin);
 
 // router.post('/send-otp', otpsender);
 // router.post('/verify-otp-mobile', verifyOTP);

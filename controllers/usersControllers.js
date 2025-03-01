@@ -432,6 +432,16 @@ exports.GoogleLogin = async (req, res) => {
   }
 };
 
+exports.getAllUSers = async (req, res) => {
+  try {
+    const users = await User.find({}).select("-password");
+    return res.status(200).json({ message: "Users fetched successfully", users });
+  } catch (error) {
+    console.error("Error in getAllUSers:", error);
+    return res.status(500).json({ message: "An error occurred while fetching users" });
+  }
+};
+
 
 
 // exports.otpsender = async (req, res) => {

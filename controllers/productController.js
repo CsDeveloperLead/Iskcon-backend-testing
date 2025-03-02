@@ -1,12 +1,10 @@
 const Product = require('../models/product'); // Adjust the path as needed
 const moment = require('moment-timezone');
 const { uploadOnCloudinary } = require("../utils/cloudinary");
-const { Console } = require('winston/lib/winston/transports');
 
 // Create a new product
 const createProduct = async (req, res) => {
    
-  Console.log("req.body",req.body)
   try {
     const { name, description, price, category, stock, productId, subDesc } = req.body;
 
@@ -38,6 +36,7 @@ const createProduct = async (req, res) => {
       productId,
       subDesc
     });
+
 
     // Check if product creation was successful
     if (!product) {

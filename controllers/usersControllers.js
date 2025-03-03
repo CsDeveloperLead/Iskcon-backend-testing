@@ -213,6 +213,7 @@ exports.login = async (req, res) => {
   }
 };
 
+
 exports.getUserDataDecoded = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -325,23 +326,33 @@ Iskcon Ghaziabad`;
   }
 };
 
+
 exports.resetPassword = async (req, res) => {
   try {
     const { email, newPassword } = req.body;
-    
+
+    // Validate input
     if (!email || !newPassword) {
       return res.status(400).json({ message: "Email and new password are required" });
     }
 
+    // Find the user by email
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Hash the new password correctly
+    // Check if the new password is the same as the old password
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res.status(406).json({ message: "This password is already used. Please choose a different password." });
+    }
+
+    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    // Save hashed password in the database
+
+    // Update the user's password
     user.password = hashedPassword;
     await user.save();
 

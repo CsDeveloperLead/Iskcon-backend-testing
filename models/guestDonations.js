@@ -7,7 +7,6 @@ const guestDonationSchema = new mongoose.Schema({
     guestDonationId: {
         type: String, // UUID type
         default: () => require("uuid").v4(), // Automatically generate UUID
-        required: true,
         unique: true,
     },
     amount: {
